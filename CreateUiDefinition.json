@@ -1,0 +1,198 @@
+{
+  "handler": "Microsoft.Compute.MultiVm",
+  "version": "0.0.1-preview",
+  "parameters": {
+    "basics": [
+    ],
+    "steps": [
+      {
+        "name": "bigipSettings",
+        "label": "F5 BIG-IP Settings",
+        "subLabel": {
+          "preValidation": "Configure Settings for the F5 BIG-IP",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "F5 BIG-IP Configuration Settings",
+        "elements": [
+          {
+            "name": "dnsNameForPublicIP",
+            "type": "Microsoft.Common.TextBox",
+            "label": "F5 BIG-IP Name",
+            "toolTip": "Enter a public facing DNS prefix, i.e. f5demobigip1.  Depending on region, complete FQDN will be for example: f5demobipip1.westus.cloudapp.azure.com.",
+            "constraints": {
+              "required": true,
+              "regex": "^[a-z0-9A-Z]{1,20}$",
+              "validationMessage": "Only letters and numbers are allowed, and the value must be 1-10 characters long."
+            }
+          },
+          {
+            "name": "adminUsername",
+            "type": "Microsoft.Compute.UserNameTextBox",
+            "label": "BIG-IP Administrator Username",
+            "defaultValue": "azureuser",
+            "toolTip": "Enter administrator's username for the BIG-IP",
+            "osPlatform": "Linux"
+          },
+          {
+            "name": "SSHCredentials",
+            "type": "Microsoft.Compute.CredentialsCombo",
+            "label": {
+              "authenticationType": "Authentication type",
+              "password": "Password",
+              "confirmPassword": "Confirm password",
+              "sshPublicKey": "SSH public key"
+            },
+            "toolTip": {
+              "authenticationType": "",
+              "password": "",
+              "sshPublicKey": ""
+            },
+            "constraints": {
+              "required": true
+            },
+            "options": {
+              "hideConfirmation": false
+            },
+            "osPlatform": "Linux"
+          },
+          {
+            "name": "vmSize",
+            "type": "Microsoft.Compute.SizeSelector",
+            "label": "Virtual machine size",
+            "toolTip": "Select the desired instance size for virtual machine to provision.",
+            "recommendedSizes": [
+              "Standard_A3",
+              "Standard_A4",
+              "Standard_F4"
+            ],
+            "constraints": {
+              "allowedSizes": [
+                "Standard_A3",
+                "Standard_A4",
+                "Standard_F4",
+                "Standard_D2",
+                "Standard_D5"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "f5-networks",
+              "offer": "f5-big-ip",
+              "sku": "f5-bigip-virtual-edition-best-byol"
+            }
+          },
+          {
+            "name": "licenseToken",
+            "type": "Microsoft.Common.TextBox",
+            "label": "BYOL Token",
+            "defaultValue": "Required",
+            "toolTip": "Enter the F5 BIG-IP License key.",
+            "constraints": {
+              "required": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "federationSettings",
+        "label": "O365 Federation Settings",
+        "subLabel": {
+          "preValidation": "Configure o365 federation settings",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "Office 365 Federation Settings",
+        "elements": [
+          {
+            "name": "authFqdn",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Authentication Domain Controller FQDN",
+            "defaultValue": "Required",
+            "toolTip": "Enter FQDN of primary AD domain controller used for user authentication.",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "authIp",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Authentication Domain Controller IP Address",
+            "defaultValue": "1,2,3,4",
+            "toolTip": "Enter IP address of primary AD domain controller used for user authentication.",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "domainFqdn",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Federated Domain  (ex: 'f5demo.net')",
+            "defaultValue": "required",
+            "toolTip": "Enter federated domain suffix, (for example: 'fdemo.net').",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "dnsFqdn",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Federation IdP Endpoint FQDN",
+            "defaultValue": "required",
+            "toolTip": "Enter The public federation endpoint FQDN, (for example: 'fs.fdemo.net').",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "sslCert",
+            "type": "Microsoft.Common.FileUpload",
+            "label": "SSL Certificate Upload",
+            "defaultValue": "required",
+            "toolTip": "Browse to and select the SSL certificate, (.pfx format) file corresponding to public facing VIP.",
+            "constraints": {
+              "required": true,
+              "accept": ".pfx"
+            },
+            "options": {
+              "multiple": false,
+              "uploadMode": "file",
+              "openMode": "text",
+              "encoding": "UTF-8"
+            },
+            "visible": true
+          },
+          {
+            "name": "sslPswd",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "Password",
+              "confirmPassword": "Confirm password"
+            },
+            "toolTip": "Enter the password to open the .pfx certificate file.",
+            "constraints": {
+              "required": true,
+              "regex": "",
+              "validationMessage": ""
+            },
+            "options": {
+            "hideConfirmation": false
+            },
+            "visible": true          
+         }
+        ]
+      }
+    ],
+    "outputs": {
+      "dnsNameForPublicIP": "[steps('bigipSettings').dnsNameForPublicIP]",
+      "adminUsername": "[steps('bigipSettings').adminUsername]",
+      "adminPassword": "[steps('bigipSettings').SSHCredentials.password]",
+      "vmSize": "[steps('bigipSettings').vmSize]",
+      "licenseToken": "[steps('bigipSettings').licenseToken]",
+      "authFqdn": "[steps('federationSettings').authFqdn]",
+      "authIp": "[steps('federationSettings').authIp]",
+      "domainFqdn": "[steps('federationSettings').domainFqdn]",
+      "dnsFqdn": "[steps('federationSettings').dnsFqdn]",
+      "sslCert": "[steps('federationSettings').sslCert]",
+      "sslPswd": "[steps('federationSettings').sslPswd]"
+    }
+  }
+}
