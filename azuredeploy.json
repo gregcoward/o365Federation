@@ -2,17 +2,11 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "dnsNameForPublicIP": {
-      "type": "string",
-      "metadata": {
-        "description": "The public prefix for the BIG-IP."
-      }
-    },
     "adminUsername": {
       "type": "string",
       "defaultValue": "azureuser",
       "metadata": {
-      "description": "The BIG-IP administrator username."
+        "description": "The BIG-IP administrator username."
       }
     },
     "adminPassword": {
@@ -72,21 +66,24 @@
     }
   },
   "variables": {
+    "dnsNameForPublicIP":"[concat('f5', uniqueString(resourceGroup().id))]", 
     "entityId": "[concat('https://',trim(parameters('dnsFqdn')),'/idp/f5/')]",
     "numberOfBIGIPs": 1,
     "location": "[resourceGroup().location]",
-    "virtualNetworkName": "[concat(parameters('dnsNameForPublicIP'),'-vnet')]",
-    "loadBalancerName": "[concat(parameters('dnsNameForPublicIP'),'-alb')]",
+    "virtualNetworkName": "VNet",
+    "loadBalancerName": "bigip-alb",
+    "publicIPName": "bigip-ip",
     "vnetAddressPrefix": "10.10.0.0/16",
     "extsubnetName": "external",
     "extsubnetPrefix": "10.10.1.0/24",
     "intsubnetName": "internal",
     "intsubnetPrefix": "10.10.2.0/24",
     "ipAddress": "10.10.1.1",
-    "nicNamePrefix": "[concat(parameters('dnsNameForPublicIP'),'-nic')]",
-    "availabilitySetName": "[concat(parameters('dnsNameForPublicIP'),'-avset')]",
-    "newStorageAccountName": "[concat(tolower(parameters('dnsNameForPublicIP')),'stor')]",
-    "bigipNamePrefix": "[concat(parameters('dnsNameForPublicIP'),'-bigip')]",
+    "nicNamePrefix": "bigip-nic",
+    "availabilitySetName": "bigip-avset",
+    "appPort": 6443,
+    "newStorageAccountName": "[concat(tolower(variables('dnsNameForPublicIP')),'stor')]",
+    "bigipNamePrefix": "bigip",
     "baseUrl": "https://raw.githubusercontent.com/gregcoward/azureO365_single/master/",
     "iappTemplate": "f5.microsoft_office_365_idp.v1.1.0.tmpl",
     "iappUrl": "[concat(variables('baseUrl'),variables('iappTemplate'))]",
@@ -94,7 +91,8 @@
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('extsubnetName'))]",
     "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]",
     "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
-    "publicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('dnsNameForPublicIP'))]"
+    "publicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPName'))]",
+    "singleQuote": "'"    
   },
   "resources": [
     {
@@ -142,7 +140,7 @@
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[parameters('dnsNameForPublicIP')]",
+      "name": "[variables('publicIPName')]",
       "location": "[variables('location')]",
       "tags": {
         "displayName": "PublicIPAddress"
@@ -150,7 +148,7 @@
       "properties": {
         "publicIPAllocationMethod": "Static",
         "dnsSettings": {
-          "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
+          "domainNameLabel": "[variables('dnsNameForPublicIP')]"
         }
       }
     },
@@ -206,7 +204,7 @@
         "displayName": "AzureLoadBalancer"
       },
       "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', parameters('dnsNameForPublicIP'))]"
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPName'))]"
       ],
       "location": "[variables('location')]",
       "name": "[variables('loadBalancerName')]",
@@ -386,23 +384,26 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('bigipNamePrefix'),'0/start0')]",
+      "name": "[concat(variables('bigipNamePrefix'),copyindex(),'/start',copyindex())]",
       "apiVersion": "2015-05-01-preview",
       "location": "[variables('location')]",
+      "copy": {
+        "name": "lbNatLoop",
+        "count": "[variables('numberOfBIGIPs')]"
+      },
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/',variables('bigipNamePrefix'),'0')]"
+        "[concat('Microsoft.Compute/virtualMachines/',variables('bigipNamePrefix'),copyindex())]"
       ],
       "properties": {
-        "publisher": "Microsoft.OSTCExtensions",
-        "type": "CustomScriptForLinux",
-        "typeHandlerVersion": "1.2",
+        "publisher": "Microsoft.Azure.Extensions",
+        "type": "CustomScript",
+        "typeHandlerVersion": "2.0",
         "settings": {
           "fileUris": [
-            "[concat(variables('baseURL'),'azureo365.sh')]",
-            "[concat(variables('baseURL'),'o365start.sh')]"
+            "[concat(variables('baseURL'),'runScripts.js')]"
           ],
-          "commandToExecute": "[concat('bash o365start.sh ','true',';',variables('bigipNamePrefix'),'0',';',variables('ipAddress'),'0',';',parameters('adminPassword'),';',parameters('licenseToken'),';',variables('bigipNamePrefix'),'0',';',variables('ipAddress'),'0',' 6443 ',variables('entityId'),';',parameters('authFqdn'),';',parameters('authIp'),';',parameters('domainfqdn'),';',parameters('sslCert'),';',parameters('sslPswd'),';',parameters('dnsFqdn'),';',variables('iappUrl'))]"
-        }
+          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --onboard \" --output /var/log/onboard.log --log-level debug --host ', concat(variables('ipAddress'),copyindex()), ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(variables('bigipNamePrefix'),copyindex(),'.',parameters('domainFqdn')), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseToken'), ' --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module afm:none --module apm:nominal --signal ONBOARD_DONE \"')]"
+       }
       }
     }
   ],
