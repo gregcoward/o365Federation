@@ -17,7 +17,7 @@ do	case "$option"  in
         u) iappUrl=$OPTARG;;
     esac 
 done
-
+sleep 20
 user="admin"
 echo "'"$ipAddress"'"
 echo "'"$entityId"'"
