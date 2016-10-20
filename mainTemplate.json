@@ -2,6 +2,14 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "baseUrl": {
+      "type": "string",
+      "defaultValue": "https://raw.githubusercontent.com/gregcoward/o365Federation/master",
+      "metadata": {
+        "description": "The base URL for marketplace deployment.",
+        "artifactsBaseUrl": ""
+      }
+    },
     "location": {
       "type": "string",
       "defaultValue": "westus",
@@ -69,14 +77,6 @@
       "type": "securestring",
       "metadata": {
         "description": "The SSL certificate .pfx file corresponding to public facing VIP."
-      }
-    },
-    "baseUrl": {
-      "type": "string",
-      "defaultValue": "https://raw.githubusercontent.com/gregcoward/o365Federation/master",
-      "metadata": {
-        "description": "The base URL for marketplace deployment.",
-        "artifactsBaseUrl": ""
       }
     },
     "vnetName": {
