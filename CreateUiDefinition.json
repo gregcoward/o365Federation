@@ -32,7 +32,7 @@
               "sshPublicKey": "SSH public key"
             },
             "toolTip": {
-              "authenticationType": "",
+              "authenticationType": "Select whether using password or SSH certificate.",
               "password": "",
               "sshPublicKey": ""
             },
@@ -50,12 +50,14 @@
             "label": "Virtual machine size",
             "toolTip": "Select the desired instance size for virtual machine to provision.",
             "recommendedSizes": [
+              "Standard_D3_v2",
               "Standard_A3",
               "Standard_A4",
               "Standard_F4"
             ],
             "constraints": {
               "allowedSizes": [
+                "Standard_D3_v2",
                 "Standard_A3",
                 "Standard_A4",
                 "Standard_F4",
@@ -63,15 +65,47 @@
                 "Standard_D5"
               ]
             },
-            "osPlatform": "Linux",
-            "imageReference": {
-              "publisher": "f5-networks",
-              "offer": "f5-big-ip",
-              "sku": "f5-bigip-virtual-edition-best-byol"
-            }
+            "osPlatform": "Linux"
           },
           {
-            "name": "licenseToken",
+          "name": "virtualNetwork",
+          "type": "Microsoft.Network.VirtualNetworkCombo",
+          "label": {
+            "virtualNetwork": "Virtual network",
+            "subnets": "Subnets"
+          },
+          "toolTip": {
+            "virtualNetwork": "Select an existing creat a new virtual network.",
+            "subnets": ""
+          },
+          "defaultValue": {
+            "name": "Vnet",
+            "addressPrefixSize": "/16"
+          },
+          "constraints": {
+            "minAddressPrefixSize": "/16"
+          },
+          "options": {
+            "hideExisting": false
+          },
+          "subnets": {
+            "subnet1": {
+              "label": "subnetName",
+              "defaultValue": {
+                "name": "subnet1",
+                "addressPrefixSize": "/24"
+              },
+              "constraints": {
+                "minAddressPrefixSize": "/24",
+                "minAddressCount": 12,
+                "requireContiguousAddresses": true
+              }
+            }
+          },
+          "visible": true
+        },
+          {
+            "name": "licenseToken1",
             "type": "Microsoft.Common.TextBox",
             "label": "BYOL Token",
             "defaultValue": "Required",
@@ -105,7 +139,7 @@
             "name": "authIp",
             "type": "Microsoft.Common.TextBox",
             "label": "Authentication Domain Controller IP Address",
-            "defaultValue": "1,2,3,4",
+            "defaultValue": "0.0.0.0",
             "toolTip": "Enter IP address of primary AD domain controller used for user authentication.",
             "constraints": {
               "required": true
@@ -139,11 +173,11 @@
             "toolTip": "Browse to and select the SSL certificate, (.pfx format) file corresponding to public facing VIP.",
             "constraints": {
               "required": true,
-              "accept": ".pfx"
+              "accept": ".pfx, .p12"
             },
             "options": {
               "multiple": false,
-              "uploadMode": "file",
+              "uploadMode": "url",
               "openMode": "text",
               "encoding": "UTF-8"
             },
@@ -163,24 +197,31 @@
               "validationMessage": ""
             },
             "options": {
-            "hideConfirmation": false
+              "hideConfirmation": false
             },
-            "visible": true          
-         }
+            "visible": true
+          }
         ]
       }
     ],
     "outputs": {
+      "location": "[location()]",
       "adminUsername": "[steps('bigipSettings').adminUsername]",
       "adminPassword": "[steps('bigipSettings').SSHCredentials.password]",
       "vmSize": "[steps('bigipSettings').vmSize]",
-      "licenseToken": "[steps('bigipSettings').licenseToken]",
+      "licenseToken1": "[steps('bigipSettings').licenseToken1]",
       "authFqdn": "[steps('federationSettings').authFqdn]",
       "authIp": "[steps('federationSettings').authIp]",
       "domainFqdn": "[steps('federationSettings').domainFqdn]",
       "dnsFqdn": "[steps('federationSettings').dnsFqdn]",
       "sslCert": "[steps('federationSettings').sslCert]",
-      "sslPswd": "[steps('federationSettings').sslPswd]"
+      "sslPswd": "[steps('federationSettings').sslPswd]",
+      "vnetName": "[steps('bigipSettings').virtualNetwork.name]",
+      "vnetAddressPrefix": "[steps('bigipSettings').virtualNetwork.addressPrefix]",
+      "subnetName": "[steps('bigipSettings').virtualNetwork.subnets.subnet1.name]",
+      "subnetAddressPrefix": "[steps('bigipSettings').virtualNetwork.subnets.subnet1.addressPrefix]",
+      "vnetNewOrExisting": "[steps('bigipSettings').virtualNetwork.newOrExisting]",
+      "vnetExistingRGName": "[steps('bigipSettings').virtualNetwork.resourceGroup]"
     }
   }
 }
