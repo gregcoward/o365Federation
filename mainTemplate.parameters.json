@@ -1,0 +1,123 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "parameterValues": {
+    "baseUrl": {
+      "type": "string",
+      "defaultValue": "https://raw.githubusercontent.com/gregcoward/o365Federation/master",
+      "metadata": {
+        "description": "The base URL for marketplace deployment.",
+        "artifactsBaseUrl": ""
+      }
+    },
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "The Azure location hosting the resource"
+      }
+    },    
+	  "adminUsername": {
+      "type": "string",
+      "defaultValue": "azureuser",
+      "metadata": {
+      "description": "The BIG-IP administrator username."
+      }
+    },
+    "adminPassword": {
+      "type": "string",
+      "metadata": {
+        "description": "The BIG-IP administrator password."
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_A3",
+      "metadata": {
+        "description": "The size of the Virtual Hardware Instance."
+      }
+    },
+    "licenseToken1": {
+      "type": "string",
+      "metadata": {
+        "description": "The License Token for the first BYOL F5 Web Application Firewall."
+      }
+    },
+    "authFqdn": {
+      "type": "string",
+      "metadata": {
+        "description": "Specify your Active Directory domain controller FQDN."
+      }
+    },
+    "authIp": {
+      "type": "string",
+      "metadata": {
+        "description": "Specify your Active Directory domain controller IP."
+      }
+    },
+    "domainFqdn": {
+      "type": "string",
+      "metadata": {
+        "description": "Specify the FQDN of the Active Directory deployment for your Office 365 users. This is the FQDN for your domain, such as example.com, rather than the FQDN for any specific host."
+      }
+    },
+    "dnsFqdn": {
+      "type": "string",
+      "metadata": {
+        "description": "The public federation endpoint FQDN"
+      }
+    },
+    "sslCert": {
+      "type": "string",
+      "metadata": {
+        "description": "The SSL certificate .pfx file corresponding to public facing VIP."
+      }
+    },
+    "sslPswd": {
+      "type": "string",
+      "metadata": {
+        "description": "The SSL certificate .pfx file corresponding to public facing VIP."
+      }
+    },
+    "vnetName": {
+      "type": "string",
+      "defaultValue": "Vnet",
+      "metadata": {
+        "description": "Specify the virtual network name."
+      }
+    },
+    "vnetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.10.0.0/16",
+      "metadata": {
+        "description": "Specify the virtual network address space."
+      }
+    },
+    "subnetName": {
+      "type": "string",
+      "defaultValue": "subnet1",
+      "metadata": {
+        "description": "Specify the virtual subnet name wher the BIG-IP will reside."
+      }
+    },
+    "subnetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.10.1.0/24",
+      "metadata": {
+        "description": "Specify the virtual subnet address space."
+      }
+    },
+    "vnetNewOrExisting": {
+      "type": "string",
+      "defaultValue": "new",
+      "metadata": {
+        "description": "New or Existing Virtual Network"
+      }
+    },
+    "vnetExistingRGName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Existing Virtual Network name"
+      }
+    }
+  }
+}
