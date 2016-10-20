@@ -15,17 +15,6 @@
         "bladeTitle": "F5 BIG-IP Configuration Settings",
         "elements": [
           {
-            "name": "dnsNameForPublicIP",
-            "type": "Microsoft.Common.TextBox",
-            "label": "F5 BIG-IP Name",
-            "toolTip": "Enter a public facing DNS prefix, i.e. f5demobigip1.  Depending on region, complete FQDN will be for example: f5demobipip1.westus.cloudapp.azure.com.",
-            "constraints": {
-              "required": true,
-              "regex": "^[a-z0-9A-Z]{1,20}$",
-              "validationMessage": "Only letters and numbers are allowed, and the value must be 1-10 characters long."
-            }
-          },
-          {
             "name": "adminUsername",
             "type": "Microsoft.Compute.UserNameTextBox",
             "label": "BIG-IP Administrator Username",
@@ -182,7 +171,6 @@
       }
     ],
     "outputs": {
-      "dnsNameForPublicIP": "[steps('bigipSettings').dnsNameForPublicIP]",
       "adminUsername": "[steps('bigipSettings').adminUsername]",
       "adminPassword": "[steps('bigipSettings').SSHCredentials.password]",
       "vmSize": "[steps('bigipSettings').vmSize]",
