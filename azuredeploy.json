@@ -10,7 +10,7 @@
       }
     },
     "adminPassword": {
-      "type": "string",
+      "type": "securestring",
       "metadata": {
         "description": "The BIG-IP administrator password."
       }
@@ -22,7 +22,7 @@
         "description": "The size of the Virtual Hardware Instance."
       }
     },
-    "licenseToken": {
+    "licenseToken1": {
       "type": "string",
       "metadata": {
         "description": "The License Token for the first BYOL F5 Web Application Firewall."
@@ -66,7 +66,7 @@
     }
   },
   "variables": {
-    "dnsNameForPublicIP":"[concat('f5', uniqueString(resourceGroup().id))]", 
+    "dnsNameForPublicIP": "[concat('f5', uniqueString(resourceGroup().id))]",
     "entityId": "[concat('https://',trim(parameters('dnsFqdn')),'/idp/f5/')]",
     "numberOfBIGIPs": 1,
     "location": "[resourceGroup().location]",
@@ -84,7 +84,9 @@
     "appPort": 6443,
     "newStorageAccountName": "[concat(tolower(variables('dnsNameForPublicIP')),'stor')]",
     "bigipNamePrefix": "bigip",
-    "baseUrl": "https://raw.githubusercontent.com/gregcoward/azureO365_single/master/",
+    "baseUrl": "https://raw.githubusercontent.com/gregcoward/o365Federation/master/",
+    "scriptName": "o365FedDeploy.sh",
+    "scriptLoc": "[concat(variables('baseUrl'),variables('scriptName'))]",
     "iappTemplate": "f5.microsoft_office_365_idp.v1.1.0.tmpl",
     "iappUrl": "[concat(variables('baseUrl'),variables('iappTemplate'))]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
@@ -92,7 +94,8 @@
     "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]",
     "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
     "publicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPName'))]",
-    "singleQuote": "'"    
+    "singleQuote": "'",
+    "commandArgs": "[concat(' -i ', variables('ipAddress'),'0',' -p ',variables('appPort'),' -e ', variables('entityId'),' -d ', parameters('authFqdn'),' -a ', parameters('authIp'),' -f ', parameters('domainfqdn'),' -c ', parameters('sslCert'),' -w ', parameters('sslPswd'),' -x ', parameters('adminPassword'),' -u ', variables('iappUrl'))]"
   },
   "resources": [
     {
@@ -102,7 +105,7 @@
       },
       "type": "Microsoft.Storage/storageAccounts",
       "location": "[variables('location')]",
-      "apiVersion": "2015-05-01-preview",
+      "apiVersion": "2015-06-15",
       "properties": {
         "accountType": "Standard_LRS"
       }
@@ -384,12 +387,12 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('bigipNamePrefix'),copyindex(),'/start',copyindex())]",
-      "apiVersion": "2015-05-01-preview",
+      "name": "[concat(variables('bigipNamePrefix'),copyindex(),'/start')]",
+      "apiVersion": "2016-03-30",
       "location": "[variables('location')]",
       "copy": {
-        "name": "lbNatLoop",
-        "count": "[variables('numberOfBIGIPs')]"
+        "count": "[variables('numberOfBIGIPs')]",
+        "name": "bigipcopy"
       },
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/',variables('bigipNamePrefix'),copyindex())]"
@@ -400,13 +403,15 @@
         "typeHandlerVersion": "2.0",
         "settings": {
           "fileUris": [
-            "[concat(variables('baseURL'),'runScripts.js')]"
-          ],
-          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --onboard \" --output /var/log/onboard.log --log-level debug --host ', concat(variables('ipAddress'),copyindex()), ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(variables('bigipNamePrefix'),copyindex(),'.',parameters('domainFqdn')), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseToken'), ' --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module afm:none --module apm:nominal --signal ONBOARD_DONE \"')]"
-       }
+            "https://f5cloudlibs.blob.core.windows.net/archive/runScripts.js"
+          ]
+        },
+        "protectedSettings": {
+          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --onboard \" --output /var/log/onboard.log --log-level debug --host ', concat(variables('ipAddress'), copyindex()), ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(variables('bigipNamePrefix'), copyindex(), '.', parameters('domainFqdn')), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseToken1'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module apm:nominal --module afm:none --signal ONBOARD_DONE \" --script \" --wait-for ONBOARD_DONE --output /var/log/runScript.log --log-level debug --url ',variables('scriptLoc'),' --cl-args ', variables('singleQuote'), variables('commandArgs'), variables('singleQuote'), '\"')]"
+        }
       }
     }
   ],
-  "outputs": {
-       }
+      "outputs": {
+      }
     }
