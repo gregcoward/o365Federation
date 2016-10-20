@@ -3,7 +3,7 @@ export PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin/"
 
 IP_REGEX='^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'
 
-while getopts i:p:e:d:a:f:c:w:x:u: option
+while getopts m:d:n:h:s:t:l:a:c:u:p: option
 do	case "$option"  in
         i) ipAddress=$OPTARG;;
 	    p) port=$OPTARG;;
@@ -17,13 +17,9 @@ do	case "$option"  in
         u) iappUrl=$OPTARG;;
     esac 
 done
-sleep 20
+
 user="admin"
-echo "'"$ipAddress"'"
-echo "'"$entityId"'"
-echo "'"$sslCert"'"
-echo "'"$sslPswd"'"
-echo "'"$iappUrl"'"
+
 # download and install Certificate
 echo "Starting Certificate download"
 certificate_location=$sslCert
