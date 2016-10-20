@@ -19,7 +19,11 @@ do	case "$option"  in
 done
 
 user="admin"
-
+echo "'"$ipAddress"'"
+echo "'"$entityId"'"
+echo "'"$sslCert"'"
+echo "'"$sslPswd"'"
+echo "'"$iappUrl"'"
 # download and install Certificate
 echo "Starting Certificate download"
 certificate_location=$sslCert
