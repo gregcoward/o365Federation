@@ -21,16 +21,12 @@ done
 user="admin"
 
 # download and install Certificate
+echo "Starting Certificate download"
 certificate_location=$sslCert
  curl -k -s -f --retry 5 --retry-delay 10 --retry-max-time 10 -o /config/o365FedCert.pfx $certificate_location
- response_code=$(curl -sku $user:$passwd -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost/mgmt/tm/sys/config -d '{"command": "load","name": "merge","options": [ { "file": "/config/'"$template"'" } ] }' -o /dev/null)
-     if [[ $response_code != 200  ]]; then
-          echo "Failed to download certificate file; exiting with response code '"$response_code"'"
-          exit
-     else
-          tmsh install sys crypto pkcs12 o365FedCert from-local-file /config/o365FedCert.pfx passphrase $sslPswd
-     fi
-     sleep 10
+ tmsh install sys crypto pkcs12 o365FedCert from-local-file /config/o365FedCert.pfx passphrase $sslPswd
+ echo "Certificate download Completed"
+ sleep 10
 
 # download iApp templates
 template_location=$iappUrl
