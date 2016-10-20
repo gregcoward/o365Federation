@@ -6,7 +6,7 @@ IP_REGEX='^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'
 while getopts m:d:n:h:s:t:l:a:c:u:p: option
 do	case "$option"  in
         i) ipAddress=$OPTARG;;
-	    p) port=$OPTARG;;
+	p) port=$OPTARG;;
         e) entityId=$OPTARG;;
         d) authFqdn=$OPTARG;;
         a) authIp=$OPTARG;;
@@ -15,9 +15,8 @@ do	case "$option"  in
         w) sslPswd=$OPTARG;;
         m) dnsFqdn=$OPTARG;;
         u) iappUrl=$OPTARG;;
-		x) passwd=$OPTARG;;
-		h) hostname=$OPTARG;;
-		
+	x) passwd=$OPTARG;;
+	h) hostname=$OPTARG;;
     esac 
 done
 
