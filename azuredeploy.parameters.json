@@ -21,7 +21,7 @@
         "description": "The size of the Virtual Hardware Instance."
       }
     },
-    "licenseToken": {
+    "licenseToken1": {
       "type": "string",
       "metadata": {
         "description": "The License Token for the first BYOL F5 Web Application Firewall."
