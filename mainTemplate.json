@@ -95,7 +95,7 @@
     },
     "subnetName": {
       "type": "string",
-      "defaultValue": "Vnet",
+      "defaultValue": "subnet1",
       "metadata": {
         "description": "Specify the virtual subnet name wher the BIG-IP will reside."
       }
