@@ -208,6 +208,8 @@
       "location": "[location()]",
       "adminUsername": "[steps('bigipSettings').adminUsername]",
       "adminPassword": "[steps('bigipSettings').SSHCredentials.password]",
+      "sshPublicKey": "[steps('bigipSettings').SSHCredentials.sshPublicKey]",
+      "authenticationType": "[steps('bigipSettings').SSHCredentials.authenticationType]",      
       "vmSize": "[steps('bigipSettings').vmSize]",
       "licenseToken1": "[steps('bigipSettings').licenseToken1]",
       "authFqdn": "[steps('federationSettings').authFqdn]",
