@@ -154,7 +154,7 @@
     {
       "apiVersion": "[parameters('apiVersionCompute')]",
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat(paramters('bigipNamePrefix'),parameters('copyCount'))]",
+      "name": "[concat(parameters('bigipNamePrefix'),parameters('copyCount'))]",
       "location": "[parameters('location')]",
       "tags": {
         "displayName": "BIG-IP"
