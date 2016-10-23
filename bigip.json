@@ -209,7 +209,7 @@
   ],
   "outputs": {
     "bigip-ip": {
-      "value": "[reference(variables('nicNamePrefix'),parameters('copyCount')).ipConfigurations[0].properties.privateIpAddress]",
+      "value": "[reference(concat(variables('nicNamePrefix'),parameters('copyCount')).ipConfigurations[0].properties.privateIpAddress]",
       "type": "string"
     }
   }
