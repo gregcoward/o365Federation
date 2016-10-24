@@ -140,10 +140,10 @@
 
               "loadBalancerInboundNatRules": [
                 {
-                  "id": "[concat(parameters('lbId'), '/inboundNatRules/', 'sshmgt', paramters('copyCount'))]"
+                  "id": "[concat(parameters('lbId'), '/inboundNatRules/', 'sshmgt', parameters('copyCount'))]"
                 },
                 {
-                  "id": "[concat(parameters('lbId'), '/inboundNatRules/', 'guimgt', paramters('copyCount'))]"
+                  "id": "[concat(parameters('lbId'), '/inboundNatRules/', 'guimgt', parameters('copyCount'))]"
                 }
               ]
             }
