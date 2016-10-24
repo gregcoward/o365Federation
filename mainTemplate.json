@@ -30,6 +30,18 @@
         "description": "The BIG-IP administrator password."
       }
     },
+    "sshPublicKey": {
+      "type": "string",
+      "metadata": {
+        "description": "The BIG-IP ssh public key."
+      }
+    },
+    "authenticationType": {
+      "type": "string",
+      "metadata": {
+        "description": "The type of auth utilized - password or ssh public key"
+      }
+    },
     "vmSize": {
       "type": "string",
       "defaultValue": "Standard_D3_v2",
@@ -130,19 +142,19 @@
     "dnsNameForPublicIP": "[concat('f5', uniqueString(resourceGroup().id))]",
     "entityId": "[concat('https://',trim(parameters('dnsFqdn')),'/idp/f5/')]",
     "numberOfBigips": 1,
-    "virtualNetworkName": "VNet",
     "vnetLink": "[concat(parameters('baseUrl'),'/',parameters('vnetNewOrExisting'),'vnet.json')]",
-    "loadBalancerName": "bigip-alb",
+    "loadBalancerName": "[concat(variables('bigipNamePrefix'),'-alb')]",
     "bigipLink": "[concat(parameters('baseUrl'),'/bigip.json')]",
-    "availabilitySetName": "bigip-avset",
+    "availabilitySetName": "[concat(variables('bigipNamePrefix'),'-avset')]",
     "appPort": 6443,
     "newStorageAccountName": "[concat(tolower(variables('dnsNameForPublicIP')),'stor')]",
     "bigipNamePrefix": "bigip",
+    "publicIPName": "[concat(variables('bigipNamePrefix'),'-ip')]",
     "scriptName": "o365FedDeploy.sh",
     "scriptLoc": "[concat(parameters('baseUrl'),'/',variables('scriptName'))]",
     "iappTemplate": "f5.microsoft_office_365_idp.v1.1.0.tmpl",
     "iappUrl": "[concat(parameters('baseUrl'),'/',variables('iappTemplate'))]",
-    "vnetId": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
+    "vnetId": "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]",
     "lbId": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]",
     "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
@@ -215,6 +227,7 @@
       },
       {
         "apiVersion": "[variables('apiVersionNetwork')]",
+        "type": "Microsoft.Network/loadBalancers",
         "tags": {
           "displayName": "AzureLoadBalancer"
         },
@@ -270,8 +283,7 @@
               "name": "[concat('lbprobeHTTPS', '1')]"
             }
           ]
-        },
-        "type": "Microsoft.Network/loadBalancers"
+        }
       },
       {
         "apiVersion": "[variables('apiVersionNetwork')]",
@@ -334,7 +346,7 @@
       },
       {
         "apiVersion": "[variables('linkTemplateApiVersion')]",
-        "name": "[concat(variables('bigip, copyindex())]",
+        "name": "[concat(variables('bigipNamePrefix'), copyindex())]",
         "type": "Microsoft.Resources/deployments",
         "copy": {
           "name": "bigipset",
@@ -344,8 +356,8 @@
           "[resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName'))]",
           "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]",
           "[resourceId('Microsoft.Storage/storageAccounts', variables('newStorageAccountName'))]",
-          "[concat(variables('lbId'),'/inboundNatRules/'/guimgt', copyIndex())]",
-          "[concat(variables('lbId'),'/inboundNatRules/'/sshmgt', copyIndex())]",
+          "[concat(variables('lbId'),'/inboundNatRules/guimgt', copyIndex())]",
+          "[concat(variables('lbId'),'/inboundNatRules/sshmgt', copyIndex())]",
           "VirtualNetworkTemplate"
         ],
         "properties": {
@@ -365,7 +377,7 @@
               "value": "[parameters('location')]"
             },
             "bigipNamePrefix": {
-              "value": "[concat(parameters('bigipNamePrefix'), copyindex())]"
+              "value": "[concat(variables('bigipNamePrefix'), copyindex())]"
             },
             "adminUsername": {
               "value": "[parameters('adminUsername')]"
@@ -410,7 +422,7 @@
           "name": "bigipcopy"
         },
         "dependsOn": [
-          "[concat('Microsoft.Compute/virtualMachines/',variables('bigipNamePrefix'),copyindex())]"
+            "bigipset"
         ],
         "properties": {
           "publisher": "Microsoft.Azure.Extensions",
