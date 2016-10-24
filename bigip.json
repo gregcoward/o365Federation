@@ -173,7 +173,7 @@
 				"osDisk": {
 					"name": "[concat('osdisk',parameters('bigipNamePrefix'))]",
 					"vhd": {
-            "uri": "[concat('http://',parameters('newStorageAccountName'),'.blob.core.windows.net/',parameters('newStorageAccountName'),'/osDisk',parameters('copyCount'),'.vhd')]"
+            				"uri": "[concat('http://',parameters('newStorageAccountName'),'.blob.core.windows.net/',parameters('newStorageAccountName'),'/osDisk',parameters('copyCount'),'.vhd')]"
 					},
 					"caching": "ReadWrite",
 					"createOption": "FromImage"
