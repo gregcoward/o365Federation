@@ -123,7 +123,7 @@
     {
       "apiVersion": "[variables('apiVersionNetwork')]",
       "type": "Microsoft.Network/networkInterfaces",
-      "name": "nicDeploy",
+      "name": "[variables('nicNamePrefix')]",
       "location": "[parameters('location')]",
       "tags": {
         "displayName": "NetworkInterface"
@@ -167,7 +167,7 @@
         "displayName": "BIG-IP"
       },
       "dependsOn": [
-        "nicDeploy"
+        "[concat('Microsoft.Network/NetworkInterface/', variables('nicNamePrefix'))]"
       ],
       "plan": {
         "name": "f5-bigip-virtual-edition-best-byol",
