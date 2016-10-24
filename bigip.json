@@ -73,6 +73,7 @@
       "metadata": {
         "description": "The load balancer id"
       },
+    },
     "asId": {
       "type": "string",
       "metadata": {
