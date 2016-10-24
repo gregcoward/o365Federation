@@ -173,7 +173,7 @@
 				"osDisk": {
 					"name": "[concat('osdisk',parameters('bigipNamePrefix'))]",
 					"vhd": {
-						"uri": "[concat('http://',variables('newStorageAccountName'),'.blob.core.windows.net/',variables('newStorageAccountName'),'/osDisk',parameters('bigipNamePrefix'),'.vhd')]"
+						"uri": "[concat('http://',parameters('newStorageAccountName'),'.blob.core.windows.net/',variables('newStorageAccountName'),'/osDisk',parameters('bigipNamePrefix'),'.vhd')]"
 					},
 					"caching": "ReadWrite",
 					"createOption": "FromImage"
@@ -187,7 +187,7 @@
 			"diagnosticsProfile": {
 				"bootDiagnostics": {
 					"enabled": true,
-					"storageUri": "[concat('http://',variables('newstorageAccountName'),'.blob.core.windows.net')]"
+					"storageUri": "[concat('http://',parameters('newstorageAccountName'),'.blob.core.windows.net')]"
 				}
 			}
 		}
