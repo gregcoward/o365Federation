@@ -91,12 +91,6 @@
       "metadata": {
         "description": "The storage account hosting bigip"
       }
-    },
-    "copyCount": {
-      "type": "int",
-      "metadata": {
-        "description": "The copyindex value"
-      }
     }
   },
   "variables": {
@@ -127,13 +121,12 @@
     {
       "apiVersion": "[parameters('apiVersionCompute')]",
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat(parameters('bigipNamePrefix'),parameters('copyCount'))]",
+      "name": "[parameters('bigipNamePrefix')]",
       "location": "[parameters('location')]",
       "tags": {
         "displayName": "BIG-IP"
       },
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', variables('nicNamePrefix'),parameters('copyCount'))]"
       ],
       "plan": {
         "name": "f5-bigip-virtual-edition-best-byol",
@@ -158,7 +151,7 @@
           "osDisk": {
             "name": "[concat('osdisk',parameters('bigipNamePrefix'))]",
             "vhd": {
-              "uri": "[concat('http://',parameters('newStorageAccountName'),'.blob.core.windows.net/',parameters('newStorageAccountName'),'/osDisk',parameters('copyCount'),'.vhd')]"
+              "uri": "[concat('http://',parameters('newStorageAccountName'),'.blob.core.windows.net/',parameters('newStorageAccountName'),'/osDisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
