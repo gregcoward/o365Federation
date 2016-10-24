@@ -72,12 +72,18 @@
       "type": "string",
       "metadata": {
         "description": "The load balancer id"
-      },
+      }
     },
     "asId": {
       "type": "string",
       "metadata": {
         "description": "The availability set id"
+      }
+    },
+    "niId": {
+      "type": "string",
+      "metadata": {
+        "description": "The network interface id"
       }
     },
     "newStorageAccountName": {
@@ -94,8 +100,6 @@
     }
   },
   "variables": {
-    "nicNamePrefix": "bigip-nic",
-    "niId": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicNamePrefix'),parameters('copyCount'))]",
     "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
     "osProfileChosen": "[concat('osProfile', parameters('authenticationType'))]",
     "osProfilesshPublicKey": {
@@ -120,43 +124,6 @@
     }
   },
   "resources": [
-    {
-      "apiVersion": "[parameters('apiVersionNetwork')]",
-      "type": "Microsoft.Network/networkInterfaces",
-      "name": "[concat(variables('nicNamePrefix'),parameters('copyCount'))]",
-      "location": "[parameters('location')]",
-      "tags": {
-        "displayName": "NetworkInterface"
-      },
-      "dependsOn": [ ],
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig1",
-            "properties": {
-              "privateIPAllocationMethod": "Dynamic",
-              "subnet": {
-                "id": "[parameters('subnetRef')]"
-              },
-              "loadBalancerBackendAddressPools": [
-                {
-                  "id": "[concat(parameters('lbId'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
-                }
-              ],
-
-              "loadBalancerInboundNatRules": [
-                {
-                  "id": "[concat(parameters('lbId'), '/inboundNatRules/', 'sshmgt', parameters('copyCount'))]"
-                },
-                {
-                  "id": "[concat(parameters('lbId'), '/inboundNatRules/', 'guimgt', parameters('copyCount'))]"
-                }
-              ]
-            }
-          }
-        ]
-      }
-    },
     {
       "apiVersion": "[parameters('apiVersionCompute')]",
       "type": "Microsoft.Compute/virtualMachines",
@@ -200,7 +167,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[variables('niId')]"
+            "id": "[parameters('niId')]"
             }
           ]
         },
@@ -214,9 +181,5 @@
     }
   ],
 	"outputs": {
-		"bigip-ip": {
-			"value": "[reference(concat(variables('nicNamePrefix'),parameters('copyCount'))).ipConfigurations[0].properties.privateIpAddress]",
-			"type": "string"
-		}
 	}
 }
