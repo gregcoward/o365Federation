@@ -49,7 +49,7 @@
         "description": "The size of the Virtual Hardware Instance."
       }
     },
-    "licenseToken1": {
+    "licenseToken": {
       "type": "string",
       "metadata": {
         "description": "The License Token for the first BYOL F5 Web Application Firewall."
@@ -136,12 +136,11 @@
   },
   "variables": {
     "apiVersionCompute": "2015-06-15",
-		"apiVersionNetwork": "2015-06-15",
-		"apiVersionStorage": "2015-06-15",
-		"linkTemplateApiVersion": "2015-01-01",
+    "apiVersionNetwork": "2015-06-15",
+    "apiVersionStorage": "2015-06-15",
+    "linkTemplateApiVersion": "2015-01-01",
     "dnsNameForPublicIP": "[concat('f5', uniqueString(resourceGroup().id))]",
     "entityId": "[concat('https://',trim(parameters('dnsFqdn')),'/idp/f5/')]",
-    "numberOfBigips": 1,
     "vnetLink": "[concat(parameters('baseUrl'),'/',parameters('vnetNewOrExisting'),'vnet.json')]",
     "loadBalancerName": "[concat(variables('bigipNamePrefix'),'-alb')]",
     "bigipLink": "[concat(parameters('baseUrl'),'/bigip.json')]",
@@ -149,6 +148,8 @@
     "appPort": 6443,
     "newStorageAccountName": "[concat(tolower(variables('dnsNameForPublicIP')),'stor')]",
     "bigipNamePrefix": "bigip",
+    "nicNamePrefix": "bigip-nic",
+    "niId": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicNamePrefix'))]",
     "publicIPName": "[concat(variables('bigipNamePrefix'),'-ip')]",
     "scriptName": "o365FedDeploy.sh",
     "scriptLoc": "[concat(parameters('baseUrl'),'/',variables('scriptName'))]",
@@ -156,289 +157,319 @@
     "iappUrl": "[concat(parameters('baseUrl'),'/',variables('iappTemplate'))]",
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]",
+    "asId": "[resourceId('Microsoft.Network/availabilitySets',variables('availabilitySetName'))]",
     "lbId": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]",
     "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
     "publicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPName'))]",
     "singleQuote": "'",
-    "commandArgs": "[concat(' -p ',variables('appPort'),' -e ', variables('entityId'),' -d ', parameters('authFqdn'),' -a ', parameters('authIp'),' -f ', parameters('domainfqdn'),' -c ', parameters('sslCert'),' -w ', parameters('sslPswd'),' -x ', parameters('adminPassword'),' -u ', variables('iappUrl'))]"
- },
-    "resources": [
-      {
-        "name": "[variables('newStorageAccountName')]",
-        "tags": {
-          "displayName": "StorageAccount"
-        },
-        "type": "Microsoft.Storage/storageAccounts",
-        "location": "[parameters('location')]",
-        "apiVersion": "[variables('apiVersionStorage')]",
-        "properties": {
-          "accountType": "Standard_LRS"
-        }
+       "commandArgs": "[concat(' -i ', '10.10.1.4',' -p ',variables('appPort'),' -e ', variables('entityId'),' -d ', parameters('authFqdn'),' -a ', parameters('authIp'),' -f ', parameters('domainfqdn'),' -c ', parameters('sslCert'),' -w ', parameters('sslPswd'),' -x ', parameters('adminPassword'),' -u ', variables('iappUrl'))]"
+  },
+  "resources": [
+    {
+      "name": "[variables('newStorageAccountName')]",
+      "tags": {
+        "displayName": "StorageAccount"
       },
-      {
-        "apiVersion": "2015-01-01",
-        "name": "VirtualNetworkTemplate",
-        "type": "Microsoft.Resources/deployments",
-        "properties": {
-          "mode": "incremental",
-          "templateLink": {
-            "uri": "[variables('vnetLink')]",
-            "contentVersion": "1.0.0.0"
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[parameters('location')]",
+      "apiVersion": "[variables('apiVersionStorage')]",
+      "properties": {
+        "accountType": "Standard_LRS"
+      }
+    },
+    {
+      "apiVersion": "2015-01-01",
+      "name": "VirtualNetworkTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "incremental",
+        "templateLink": {
+          "uri": "[variables('vnetLink')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
           },
-          "parameters": {
-            "location": {
-              "value": "[parameters('location')]"
-            },
-            "apiVersionNetwork": {
-               "value": "[variables('apiVersionNetwork')]"
-            },
-            "vnetName": {
-               "value": "[parameters('vnetName')]"
-            },
-            "vnetAddressPrefix": {
-               "value": "[parameters('vnetAddressPrefix')]"
-            },
-            "subnetName": {
-               "value": "[parameters('subnetName')]"
-            },
-            "subnetAddressPrefix": {
-                "value": "[parameters('subnetAddressPrefix')]"
-            },
-            "vnetExistingRGName": {
-                "value": "[parameters('vnetExistingRGName')]"
-            }
-          }
-        }
-      },
-      {
-        "apiVersion": "[variables('apiVersionNetwork')]",
-        "type": "Microsoft.Network/publicIPAddresses",
-        "name": "[variables('publicIPName')]",
-        "location": "[parameters('location')]",
-        "tags": {
-          "displayName": "PublicIPAddress"
-        },
-        "properties": {
-          "publicIPAllocationMethod": "Static",
-          "dnsSettings": {
-            "domainNameLabel": "[variables('dnsNameForPublicIP')]"
-          }
-        }
-      },
-      {
-        "apiVersion": "[variables('apiVersionNetwork')]",
-        "type": "Microsoft.Network/loadBalancers",
-        "tags": {
-          "displayName": "AzureLoadBalancer"
-        },
-        "dependsOn": [
-          "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPName'))]"
-        ],
-        "location": "[parameters('location')]",
-        "name": "[variables('loadBalancerName')]",
-        "properties": {
-          "frontendIPConfigurations": [
-            {
-              "name": "[concat('loadBalancerFrontEnd', '1')]",
-              "properties": {
-                "publicIPAddress": {
-                  "id": "[concat(variables('publicIPID'))]"
-                }
-              }
-            }
-          ],
-          "backendAddressPools": [
-            {
-              "name": "loadBalancerBackEnd"
-            }
-          ],
-          "loadBalancingRules": [
-            {
-              "Name": "APP1-HTTPS",
-              "properties": {
-                "frontendIPConfiguration": {
-                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd1')]"
-                },
-                "backendAddressPool": {
-                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
-                },
-                "probe": {
-                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobeHTTPS', '1')]"
-                },
-                "protocol": "Tcp",
-                "frontendPort": 443,
-                "backendPort": 6443,
-                "idleTimeoutInMinutes": 15
-              }
-            }
-          ],
-          "probes": [
-            {
-              "properties": {
-                "protocol": "Tcp",
-                "port": 6443,
-                "intervalInSeconds": 15,
-                "numberOfProbes": 2
-              },
-              "name": "[concat('lbprobeHTTPS', '1')]"
-            }
-          ]
-        }
-      },
-      {
-        "apiVersion": "[variables('apiVersionNetwork')]",
-        "tags": {
-          "displayName": "InboundNATRulesGUI"
-        },
-        "type": "Microsoft.Network/loadBalancers/inboundNatRules",
-        "name": "[concat(variables('loadBalancerName'),'/guimgt', copyIndex())]",
-        "location": "[parameters('location')]",
-        "copy": {
-          "name": "lbNatLoop",
-          "count": "[variables('numberOfBIGIPs')]"
-        },
-        "dependsOn": [
-          "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]"
-        ],
-        "properties": {
-          "frontendIPConfiguration": {
-            "id": "[concat(variables('frontEndIPConfigID'), '1')]"
+          "apiVersionNetwork": {
+            "value": "[variables('apiVersionNetwork')]"
           },
-          "protocol": "tcp",
-          "frontendPort": "[copyIndex(8443)]",
-          "backendPort": 443,
-          "enableFloatingIP": false
-        }
-      },
-      {
-        "apiVersion": "[variables('apiVersionNetwork')]",
-        "tags": {
-          "displayName": "InboundNATRulesSSH"
-        },
-        "type": "Microsoft.Network/loadBalancers/inboundNatRules",
-        "name": "[concat(variables('loadBalancerName'),'/sshmgt', copyIndex())]",
-        "location": "[parameters('location')]",
-        "copy": {
-          "name": "lbNatLoop",
-          "count": "[variables('numberOfBIGIPs')]"
-        },
-        "dependsOn": [
-          "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]"
-        ],
-        "properties": {
-          "frontendIPConfiguration": {
-            "id": "[concat(variables('frontEndIPConfigID'), '1')]"
+          "vnetName": {
+            "value": "[parameters('vnetName')]"
           },
-          "protocol": "tcp",
-          "frontendPort": "[copyIndex(8022)]",
-          "backendPort": 22,
-          "enableFloatingIP": false
-        }
-      },
-      {
-        "apiVersion": "[variables('apiVersionCompute')]",
-        "tags": {
-          "displayName": "AvailabilitySet"
-        },
-        "location": "[parameters('location')]",
-        "name": "[variables('availabilitySetName')]",
-        "type": "Microsoft.Compute/availabilitySets"
-      },
-      {
-        "apiVersion": "[variables('linkTemplateApiVersion')]",
-        "name": "[concat(variables('bigipNamePrefix'), copyindex())]",
-        "type": "Microsoft.Resources/deployments",
-        "copy": {
-          "name": "bigipset",
-          "count": "[variables('numberOfBigips')]"
-        },
-        "dependsOn": [
-          "[resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName'))]",
-          "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]",
-          "[resourceId('Microsoft.Storage/storageAccounts', variables('newStorageAccountName'))]",
-          "[concat(variables('lbId'),'/inboundNatRules/guimgt', copyIndex())]",
-          "[concat(variables('lbId'),'/inboundNatRules/sshmgt', copyIndex())]",
-          "VirtualNetworkTemplate"
-        ],
-        "properties": {
-          "mode": "incremental",
-          "templateLink": {
-            "uri": "[variables('bigipLink')]",
-            "contentVersion": "1.0.0.0"
+          "vnetAddressPrefix": {
+            "value": "[parameters('vnetAddressPrefix')]"
           },
-          "parameters": {
-            "apiVersionCompute": {
-              "value": "[variables('apiVersionCompute')]"
-            },
-            "apiVersionNetwork": {
-              "value": "[variables('apiVersionNetwork')]"
-            },
-            "location": {
-              "value": "[parameters('location')]"
-            },
-            "bigipNamePrefix": {
-              "value": "[concat(variables('bigipNamePrefix'), copyindex())]"
-            },
-            "adminUsername": {
-              "value": "[parameters('adminUsername')]"
-            },
-            "adminPassword": {
-              "value": "[parameters('adminPassword')]"
-            },
-            "authenticationType": {
-              "value": "[parameters('authenticationType')]"
-            },
-            "sshPublicKey": {
-              "value": "[parameters('sshPublicKey')]"
-            },
-            "vmSize": {
-              "value": "[parameters('vmSize')]"
-            },
-            "availabilitySetName": {
-              "value": "[variables('availabilitySetName')]"
-            },
-            "subnetRef": {
-              "value": "[variables('subnetRef')]"
-            },
-            "lbId": {
-              "value": "[variables('lbId')]"
-            },
-            "newStorageAccountName": {
-              "value": "[variables('newStorageAccountName')]"
-            },
-            "copyCount": {
-              "value": "[copyindex()]"
-            }
-          }
-        }
-        },
-      {
-        "type": "Microsoft.Compute/virtualMachines/extensions",
-        "name": "[concat(variables('bigipNamePrefix'),copyindex(),'/start')]",
-        "apiVersion": "[variables('apiVersionCompute')]",
-        "location": "[parameters('location')]",
-        "copy": {
-          "count": "[variables('numberOfBIGIPs')]",
-          "name": "bigipcopy"
-        },
-        "dependsOn": [
-            "bigipset"
-        ],
-        "properties": {
-          "publisher": "Microsoft.Azure.Extensions",
-          "type": "CustomScript",
-          "typeHandlerVersion": "2.0",
-          "settings": {
-            "fileUris": [
-              "https://f5cloudlibs.blob.core.windows.net/archive/runScripts.js"
-            ]
+          "subnetName": {
+            "value": "[parameters('subnetName')]"
           },
-          "protectedSettings": {
-            "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --onboard \" --output /var/log/onboard.log --log-level debug --host ', reference(concat(variables('bigipNamePrefix'),copyindex())).outputs.privateIp.value, ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(variables('bigipNamePrefix'), copyindex(), '.', parameters('domainFqdn')), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseToken1'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module apm:nominal --module afm:none --signal ONBOARD_DONE \" --script \" --wait-for ONBOARD_DONE --output /var/log/runScript.log --log-level debug --url ',variables('scriptLoc'),' --cl-args ','-i ', reference(concat(variables('bigipNamePrefix'),copyindex())).outputs.privateIp.value,variables('singleQuote'), variables('commandArgs'), variables('singleQuote'), '\"')]"
+          "subnetAddressPrefix": {
+            "value": "[parameters('subnetAddressPrefix')]"
+          },
+          "vnetExistingRGName": {
+            "value": "[parameters('vnetExistingRGName')]"
           }
         }
       }
-    ],
+    },
+    {
+      "apiVersion": "[variables('apiVersionNetwork')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPName')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "displayName": "PublicIPAddress"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('dnsNameForPublicIP')]"
+        }
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersionNetwork')]",
+      "type": "Microsoft.Network/loadBalancers",
+      "tags": {
+        "displayName": "AzureLoadBalancer"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPName'))]"
+      ],
+      "location": "[parameters('location')]",
+      "name": "[variables('loadBalancerName')]",
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "[concat('loadBalancerFrontEnd', '1')]",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[concat(variables('publicIPID'))]"
+              }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "loadBalancerBackEnd"
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "Name": "APP1-HTTPS",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd1')]"
+              },
+              "backendAddressPool": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
+              },
+              "probe": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobeHTTPS', '1')]"
+              },
+              "protocol": "Tcp",
+              "frontendPort": 443,
+              "backendPort": 6443,
+              "idleTimeoutInMinutes": 15
+            }
+          }
+        ],
+        "probes": [
+          {
+            "properties": {
+              "protocol": "Tcp",
+              "port": 6443,
+              "intervalInSeconds": 15,
+              "numberOfProbes": 2
+            },
+            "name": "[concat('lbprobeHTTPS', '1')]"
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersionNetwork')]",
+      "tags": {
+        "displayName": "InboundNATRulesGUI"
+      },
+      "type": "Microsoft.Network/loadBalancers/inboundNatRules",
+      "name": "[concat(variables('loadBalancerName'),'/guimgt')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]"
+      ],
+      "properties": {
+        "frontendIPConfiguration": {
+          "id": "[concat(variables('frontEndIPConfigID'), '1')]"
+        },
+        "protocol": "tcp",
+        "frontendPort": 8443,
+        "backendPort": 443,
+        "enableFloatingIP": false
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersionNetwork')]",
+      "tags": {
+        "displayName": "InboundNATRulesSSH"
+      },
+      "type": "Microsoft.Network/loadBalancers/inboundNatRules",
+      "name": "[concat(variables('loadBalancerName'),'/sshmgt')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]"
+      ],
+      "properties": {
+        "frontendIPConfiguration": {
+          "id": "[concat(variables('frontEndIPConfigID'), '1')]"
+        },
+        "protocol": "tcp",
+        "frontendPort": 8022,
+        "backendPort": 22,
+        "enableFloatingIP": false
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersionCompute')]",
+      "tags": {
+        "displayName": "AvailabilitySet"
+      },
+      "location": "[parameters('location')]",
+      "name": "[variables('availabilitySetName')]",
+      "type": "Microsoft.Compute/availabilitySets"
+    },
+    {
+      "apiVersion": "[variables('apiVersionNetwork')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nicNamePrefix')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "displayName": "NetworkInterface"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]",
+        "[concat(variables('lbId'),'/inboundNatRules/guimgt')]",
+        "[concat(variables('lbId'),'/inboundNatRules/sshmgt')]",
+        "VirtualNetworkTemplate"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[concat(variables('lbId'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
+                }
+              ],
+
+              "loadBalancerInboundNatRules": [
+                {
+                  "id": "[concat(variables('lbId'), '/inboundNatRules/', 'sshmgt')]"
+                },
+                {
+                  "id": "[concat(variables('lbId'), '/inboundNatRules/', 'guimgt')]"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },  
+    {
+      "apiVersion": "[variables('linkTemplateApiVersion')]",
+      "name": "bigipdeployTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName'))]",
+        "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('newStorageAccountName'))]",
+        "[concat(variables('lbId'),'/inboundNatRules/guimgt')]",
+        "[concat(variables('lbId'),'/inboundNatRules/sshmgt')]",
+        "VirtualNetworkTemplate"
+      ],
+      "properties": {
+        "mode": "incremental",
+        "templateLink": {
+          "uri": "[variables('bigipLink')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "apiVersionCompute": {
+            "value": "[variables('apiVersionCompute')]"
+          },
+          "apiVersionNetwork": {
+            "value": "[variables('apiVersionNetwork')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "bigipNamePrefix": {
+            "value": "[variables('bigipNamePrefix')]"
+          },
+          "adminUsername": {
+            "value": "[parameters('adminUsername')]"
+          },
+          "adminPassword": {
+            "value": "[parameters('adminPassword')]"
+          },
+          "authenticationType": {
+            "value": "[parameters('authenticationType')]"
+          },
+          "sshPublicKey": {
+            "value": "[parameters('sshPublicKey')]"
+          },
+          "vmSize": {
+            "value": "[parameters('vmSize')]"
+          },
+          "availabilitySetName": {
+            "value": "[variables('availabilitySetName')]"
+          },
+          "subnetRef": {
+            "value": "[variables('subnetRef')]"
+          },
+          "lbId": {
+            "value": "[variables('lbId')]"
+          },
+          "asId": {
+            "value": "[variables('asId')]"
+          },
+          "niId": {
+            "value": "[variables('niId')]"
+          },
+          "newStorageAccountName": {
+            "value": "[variables('newStorageAccountName')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('bigipNamePrefix'),'/start')]",
+      "apiVersion": "[variables('apiVersionCompute')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+         "bigipdeployTemplate"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Azure.Extensions",
+        "type": "CustomScript",
+        "typeHandlerVersion": "2.0",
+        "settings": {
+          "fileUris": [
+            "https://f5cloudlibs.blob.core.windows.net/archive/runScripts.js"
+          ] 
+        },
+        "protectedSettings": {
+            "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --onboard \" --output /var/log/onboard.log --log-level debug --host ', '10.10.1.4', ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(variables('bigipNamePrefix'), '.', parameters('domainFqdn')), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseToken'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module apm:nominal --module afm:none --signal ONBOARD_DONE \" --script \" --wait-for ONBOARD_DONE --output /var/log/runScript.log --log-level debug --url ',variables('scriptLoc'),' --cl-args ', variables('singleQuote'), variables('commandArgs'), variables('singleQuote'), '\"')]"
+        }
+      }
+    }
+  ],
     "outputs": {
     }
   }
