@@ -168,7 +168,7 @@
       },
       "properties": {
         "availabilitySet": {
-          "id": "[concat(resourceId('Microsoft.Compute/availabilitySets',parameters('availabilitySetName')))]"
+          "id": "[resourceId(concat('Microsoft.Compute/availabilitySets',parameters('availabilitySetName')))]"
         },
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"
@@ -193,7 +193,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[concat(resourceId('Microsoft.Network/networkInterfaces',variables('nicNamePrefix'),parameters('copyCount')))]"
+              "id": "[resourceId(concat('Microsoft.Network/networkInterfaces',variables('nicNamePrefix'),parameters('copyCount')))]"
             }
           ]
         },
