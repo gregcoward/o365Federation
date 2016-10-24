@@ -115,9 +115,49 @@
       "computerName": "[parameters('bigipNamePrefix')]",
       "adminUsername": "[parameters('adminUsername')]",
       "adminPassword": "[parameters('adminPassword')]"
-    }
+    },
+    "nicNamePrefix": "[concat(parameters('bigipNamePrefix'),'-nic')]",
+    "niId": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicNamePrefix'))]"
   },
   "resources": [
+    {
+      "apiVersion": "[variables('apiVersionNetwork')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "nicDeploy",
+      "location": "[parameters('location')]",
+      "tags": {
+        "displayName": "NetworkInterface"
+      },
+      "dependsOn": [
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[concat(variables('lbId'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
+                }
+              ],
+
+              "loadBalancerInboundNatRules": [
+                {
+                  "id": "[concat(variables('lbId'), '/inboundNatRules/', 'sshmgt')]"
+                },
+                {
+                  "id": "[concat(variables('lbId'), '/inboundNatRules/', 'guimgt')]"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
     {
       "apiVersion": "[parameters('apiVersionCompute')]",
       "type": "Microsoft.Compute/virtualMachines",
@@ -127,6 +167,7 @@
         "displayName": "BIG-IP"
       },
       "dependsOn": [
+        "nicDeploy"
       ],
       "plan": {
         "name": "f5-bigip-virtual-edition-best-byol",
@@ -160,7 +201,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-            "id": "[parameters('niId')]"
+              "id": "[variables('niId')]"
             }
           ]
         },
@@ -173,6 +214,10 @@
       }
     }
   ],
-	"outputs": {
-	}
+  "outputs": {
+     "bigip-ip": {
+        "value": "[reference(variables('nicNamePrefix')).ipConfigurations[0].properties.privateIpAddress]",
+        "type": "string"
+    }
+  }
 }
