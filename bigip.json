@@ -200,7 +200,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[parameters('niId')]"
+              "id": "[variables('niId')]"
             }
           ]
         },
