@@ -215,7 +215,7 @@
     }
   ],
   "outputs": {
-     "bigipip": {
+     "bigipIp": {
         "value": "[reference(variables('nicNamePrefix')).ipConfigurations[0].properties.privateIpAddress]",
         "type": "string"
     }
