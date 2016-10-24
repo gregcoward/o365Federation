@@ -88,6 +88,7 @@
     }
   },
   "variables": {
+    "nicNamePrefix": "bigip-nic"
     "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
     "osProfileChosen": "[concat('osProfile', parameters('authenticationType'))]",
     "osProfilesshPublicKey": {
@@ -110,7 +111,6 @@
       "adminUsername": "[parameters('adminUsername')]",
       "adminPassword": "[parameters('adminPassword')]"
     },
-    "nicNamePrefix": "bigip-nic"
   },
   "resources": [
     {
