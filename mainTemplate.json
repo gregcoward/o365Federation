@@ -460,11 +460,11 @@
         "typeHandlerVersion": "2.0",
         "settings": {
           "fileUris": [
-            "https://f5cloudlibs.blob.core.windows.net/archive/runScripts.js"
+            "https://raw.githubusercontent.com/gregcoward/o365Federation/master/runScripts.js"
           ]
         },
         "protectedSettings": {
-         "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --onboard \" --output /var/log/onboard.log --log-level debug --host ', reference(variables('nicNamePrefix')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(variables('bigipNamePrefix'), '.', parameters('domainFqdn')), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseToken'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module apm:nominal --module afm:none --signal ONBOARD_DONE \" --script \" --wait-for ONBOARD_DONE --output /var/log/runScript.log --log-level debug --url ',variables('scriptLoc'),' --cl-args ', variables('singleQuote'),' -i ',reference(variables('nicNamePrefix')).ipConfigurations[0].properties.privateIpAddress, variables('commandArgs'), variables('singleQuote'), '\"')]"
+            "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --onboard \" --output /var/log/onboard.log --log-level debug --host ', reference(variables('nicNamePrefix')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(variables('bigipNamePrefix'), '.', parameters('domainFqdn')), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseToken'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module apm:nominal --module afm:none --signal ONBOARD_DONE \" --script \" --wait-for ONBOARD_DONE --output /var/log/runScript.log --log-level debug --url ',variables('scriptLoc'),' --cl-args ', variables('singleQuote'),'-i ',reference(variables('nicNamePrefix')).ipConfigurations[0].properties.privateIpAddress, variables('commandArgs'), variables('singleQuote'), '\"')]"
         }
       }
     }
