@@ -179,7 +179,7 @@
     },
     {
       "apiVersion": "2015-01-01",
-      "name": "VirtualNetworkTemplate",
+      "name": "virtualNetworkTemplate",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "incremental",
@@ -349,8 +349,7 @@
       "dependsOn": [
         "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]",
         "[concat(variables('lbId'),'/inboundNatRules/guimgt')]",
-        "[concat(variables('lbId'),'/inboundNatRules/sshmgt')]",
-        "VirtualNetworkTemplate"
+        "[concat(variables('lbId'),'/inboundNatRules/sshmgt')]"
       ],
       "properties": {
         "ipConfigurations": [
@@ -382,7 +381,7 @@
     },  
     {
       "apiVersion": "[variables('linkTemplateApiVersion')]",
-      "name": "bigipdeployTemplate",
+      "name": "bigipDeployTemplate",
       "type": "Microsoft.Resources/deployments",
       "dependsOn": [
         "[resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName'))]",
@@ -390,7 +389,7 @@
         "[resourceId('Microsoft.Storage/storageAccounts', variables('newStorageAccountName'))]",
         "[concat(variables('lbId'),'/inboundNatRules/guimgt')]",
         "[concat(variables('lbId'),'/inboundNatRules/sshmgt')]",
-        "VirtualNetworkTemplate"
+        "virtualNetworkTemplate"
       ],
       "properties": {
         "mode": "incremental",
@@ -453,7 +452,7 @@
       "apiVersion": "[variables('apiVersionCompute')]",
       "location": "[parameters('location')]",
       "dependsOn": [
-         "bigipdeployTemplate"
+        "bigipDeployTemplate"
       ],
       "properties": {
         "publisher": "Microsoft.Azure.Extensions",
@@ -462,10 +461,10 @@
         "settings": {
           "fileUris": [
             "https://f5cloudlibs.blob.core.windows.net/archive/runScripts.js"
-          ] 
+          ]
         },
         "protectedSettings": {
-            "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --onboard \" --output /var/log/onboard.log --log-level debug --host ', '10.10.1.4', ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(variables('bigipNamePrefix'), '.', parameters('domainFqdn')), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseToken'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module apm:nominal --module afm:none --signal ONBOARD_DONE \" --script \" --wait-for ONBOARD_DONE --output /var/log/runScript.log --log-level debug --url ',variables('scriptLoc'),' --cl-args ', variables('singleQuote'), variables('commandArgs'), variables('singleQuote'), '\"')]"
+         "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --onboard \" --output /var/log/onboard.log --log-level debug --host ', '10.10.1.4', ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(variables('bigipNamePrefix'), '.', parameters('domainFqdn')), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseToken'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module apm:nominal --module afm:none --signal ONBOARD_DONE \" --script \" --wait-for ONBOARD_DONE --output /var/log/runScript.log --log-level debug --url ',variables('scriptLoc'),' --cl-args ', variables('singleQuote'), variables('commandArgs'), variables('singleQuote'), '\"')]"
         }
       }
     }
