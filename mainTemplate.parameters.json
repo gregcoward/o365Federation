@@ -28,6 +28,18 @@
         "description": "The BIG-IP administrator password."
       }
     },
+    "sshPublicKey": {
+      "type": "string",
+      "metadata": {
+        "description": "The BIG-IP ssh public key."
+      }
+    },
+    "authenticationType": {
+      "type": "string",
+      "metadata": {
+        "description": "The type of auth utilized - password or ssh public key"
+      }
+    },
     "vmSize": {
       "type": "string",
       "defaultValue": "Standard_A3",
@@ -35,7 +47,7 @@
         "description": "The size of the Virtual Hardware Instance."
       }
     },
-    "licenseToken1": {
+    "licenseToken": {
       "type": "string",
       "metadata": {
         "description": "The License Token for the first BYOL F5 Web Application Firewall."
