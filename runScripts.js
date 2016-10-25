@@ -6,7 +6,7 @@
  */
 'use-strict';
 
-(function() {
+(function () {
 
     var childProcess = require('child_process');
     var waiting = 0;
@@ -17,7 +17,7 @@
 
     var MAX_TRIES = 3;
 
-    var spawnScript = function(module, arrayArgs, stringArgs, tryNum) {
+    var spawnScript = function (module, arrayArgs, stringArgs, tryNum) {
         var args = arrayArgs ? arrayArgs.slice() : [];
         var cp;
 
@@ -26,7 +26,7 @@
         }
 
         if (stringArgs) {
-            stringArgs.trim().split(/\s+/).forEach(function(arg) {
+            stringArgs.trim().split(/\s+/).forEach(function (arg) {
                 args.push(arg);
             });
         }
@@ -44,11 +44,11 @@
 
         waiting++;
 
-        cp.on('error', function(error) {
+        cp.on('error', function (error) {
             logger.error(cp.pid, "got error:", error);
         });
 
-        cp.on('exit', function(code, signal) {
+        cp.on('exit', function (code, signal) {
             logger.verbose(module, "exitted with code:", code === null ? 'null' : code, "/ signal:", signal === null ? 'null' : signal);
 
             // Occasionally in Azure, a script just exits early with a bad exit code
@@ -74,7 +74,7 @@
          *
          * @param {String[]} script - Arguments to pass to runScript
          */
-        run: function(argv) {
+        run: function (argv) {
             try {
                 var loggerOptions = {};
                 var ipc;
@@ -103,7 +103,6 @@
                     console.log();
                     console.log("    --help\t\t\tOutputusage information");
                     console.log("    --onboard <args>\t\tRun the onboard.js script with args.");
-                    console.log("    --cluster <args>\t\tRun the cluster.js script with args.");
                     console.log("    --script <args>\t\tRun the runScript.js script with args. To run multiple scripts, use multiple --script entrires.");
                     process.exit();
                 }
@@ -162,15 +161,6 @@
                     logger.debug("onboard args", scriptArgs);
                     spawnScript("onboard.js", undefined, scriptArgs);
                 }
-
-                argIndex = argv.indexOf('--cluster');
-                logger.debug("cluster arg index", argIndex);
-                if (argIndex !== -1) {
-                    scriptArgs = argv[argIndex + 1];
-                    logger.debug("cluster args", scriptArgs);
-                    spawnScript("cluster.js", undefined, scriptArgs);
-                }
-
                 // Process multiple --script args
                 argIndex = argv.indexOf('--script');
                 logger.debug("script arg index", argIndex);
@@ -189,20 +179,20 @@
 
                         // Grab everything up to --cl-args
                         if (clArgIndex > 0) {
-                            scriptArgs.substring(0, clArgIndex).trim().split(/\s+/).forEach(function(arg) {
+                            scriptArgs.substring(0, clArgIndex).trim().split(/\s+/).forEach(function (arg) {
                                 args.push(arg);
                             });
                         }
 
                         // Grab everything after the --cl-args argument
                         if (clArgEnd < scriptArgs.length - 1) {
-                            scriptArgs.substring(clArgEnd + 1).trim().split(/\s+/).forEach(function(arg) {
+                            scriptArgs.substring(clArgEnd + 1).trim().split(/\s+/).forEach(function (arg) {
                                 args.push(arg);
                             });
                         }
                     }
                     else {
-                        scriptArgs.split(/\s+/).forEach(function(arg) {
+                        scriptArgs.split(/\s+/).forEach(function (arg) {
                             args.push(arg);
                         });
                     }
@@ -216,7 +206,7 @@
 
                 // If we reboot, exit - otherwise Azure doesn't know the extensions script is done
                 ipc.once('REBOOT')
-                    .then(function() {
+                    .then(function () {
                         logger.info("REBOOT signalled. Exitting.");
                         process.exit();
                     });
