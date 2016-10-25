@@ -1,6 +1,6 @@
 /**
  * Copyright 2016 F5 Networks, Inc.
- *
+ * Modified 10252016 by Greg Coward to remove cluster job
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  */
