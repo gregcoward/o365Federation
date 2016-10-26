@@ -26,12 +26,14 @@
     },
     "adminPassword": {
       "type": "securestring",
+      "defaultValue": "",
       "metadata": {
         "description": "The BIG-IP administrator password."
       }
     },
     "sshPublicKey": {
       "type": "string",
+      "defaultValue": "",
       "metadata": {
         "description": "The BIG-IP ssh public key."
       }
