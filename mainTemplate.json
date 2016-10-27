@@ -158,7 +158,7 @@
     "scriptName": "o365FedDeploy.sh",
     "scriptLoc": "[concat(parameters('baseUrl'),'/',variables('scriptName'))]",
     "iappTemplate": "f5.microsoft_office_365_idp.v1.1.0.tmpl",
-    "iappUrl": "'http://cdn.f5.com/product/blackbox/staging/azure/',variables('iappTemplate'))]",
+    "iappUrl": "[concat('http://cdn.f5.com/product/blackbox/staging/azure/',variables('iappTemplate'))]",
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]",
     "asId": "[resourceId('Microsoft.Network/availabilitySets',variables('availabilitySetName'))]",
