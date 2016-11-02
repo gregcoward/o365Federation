@@ -1,19 +1,27 @@
 /**
  * Copyright 2016 F5 Networks, Inc.
  *
- * This software may be modified and distributed under the terms
- * of the MIT license.  See the LICENSE file for details.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 'use-strict';
 
 (function() {
 
+    var fs = require('fs');
     var childProcess = require('child_process');
     var waiting = 0;
     var runner;
     var logger;
-
-    var environment = 'archive';
 
     var MAX_TRIES = 3;
 
@@ -77,6 +85,8 @@
         run: function(argv) {
             try {
                 var loggerOptions = {};
+                var loggableArgs = [];
+                var loggableArgsSplit;
                 var ipc;
                 var Logger;
                 var logLevel;
@@ -87,8 +97,33 @@
                 var clArgEnd;
                 var scriptArgs;
                 var shellOutput;
+                var f5CloudLibsTag;
+                var i;
+                var j;
 
-                console.log(process.argv[1] + " called with", process.argv.slice().join(" "));
+                var KEYS_TO_MASK = ['-p', '--password', '--set-password', '--set-root-password'];
+
+                // Log the input, but don't log passwords...
+                // ... copy args expanding those with spaces
+                for (i = 0; i < argv.length; i++) {
+                    if (argv[i].indexOf(' ') === -1) {
+                        loggableArgs.push(argv[i]);
+                    }
+                    else {
+                        loggableArgsSplit = argv[i].split(/\s+/);
+                        for (j = 0; j < loggableArgsSplit.length; ++j) {
+                            loggableArgs.push(loggableArgsSplit[j]);
+                        }
+                    }
+                }
+
+                // ... mask the passwords
+                for (i = 0; i < loggableArgs.length; ++i) {
+                    if (KEYS_TO_MASK.indexOf(loggableArgs[i]) !== -1) {
+                        loggableArgs[i + 1] = "*******";
+                    }
+                }
+                console.log(loggableArgs[1] + " called with", loggableArgs.join(' '));
 
                 // We're parsing command line options manually because the commander module used
                 // in other cloud libs scripts can't grab the cl-args as a single string in the
@@ -102,6 +137,7 @@
                     console.log("  Options:");
                     console.log();
                     console.log("    --help\t\t\tOutputusage information");
+                    console.log("    --tag\t\t\tGitHub f5-cloud-libs tag that was pulled.");
                     console.log("    --onboard <args>\t\tRun the onboard.js script with args.");
                     console.log("    --cluster <args>\t\tRun the cluster.js script with args.");
                     console.log("    --script <args>\t\tRun the runScript.js script with args. To run multiple scripts, use multiple --script entrires.");
@@ -113,25 +149,32 @@
                 shellOutput = childProcess.execSync("sed -i 's/sleep\ 5/sleep\ 10/' /etc/init.d/mysql");
                 console.log(shellOutput.toString());
 
-                argIndex = argv.indexOf('--environment');
+                argIndex = argv.indexOf('--tag');
                 if (argIndex != -1) {
-                    environment = argv[argIndex + 1];
+                    f5CloudLibsTag = argv[argIndex + 1];
                 }
 
-                console.log("Downloading latest libraries from", environment);
+                console.log("Creating f5-cloud-libs directory.");
+                fs.mkdirSync("/config/f5-cloud-libs");
+
+                console.log("Moving libraries to /config.");
+                shellOutput = childProcess.execSync("mv " + f5CloudLibsTag + " /config/f5-cloud-libs.tar.gz");
+                console.log(shellOutput.toString());
+
+                console.log("Expanding libraries.");
                 shellOutput = childProcess.execSync(
-                    "curl -sk -o f5-cloud-libs.tar.gz https://f5cloudlibs.blob.core.windows.net/" + environment + "/f5-cloud-libs.tar.gz",
+                    "tar -xzf f5-cloud-libs.tar.gz --strip-components 1 --directory f5-cloud-libs",
                     {
                         cwd: "/config"
                     }
                 );
                 console.log(shellOutput.toString());
 
-                console.log("Expanding libraries.");
+                console.log("Downloading dependencies.");
                 shellOutput = childProcess.execSync(
-                    "tar -xzf f5-cloud-libs.tar.gz",
+                    "npm install --production",
                     {
-                        cwd: "/config"
+                        cwd: "/config/f5-cloud-libs"
                     }
                 );
                 console.log(shellOutput.toString());
@@ -152,8 +195,6 @@
                 logger = Logger.getLogger(loggerOptions);
 
                 logger.info("Running scripts.");
-
-                logger.debug("raw args", argv);
 
                 argIndex = argv.indexOf('--onboard');
                 logger.debug("onboard arg index", argIndex);
@@ -226,7 +267,9 @@
                 console.log("Error running scripts: " + err);
             }
 
-            logger.debug("Done spawning scripts.");
+            if (logger) {
+                logger.debug("Done spawning scripts.");
+            }
         }
     };
 

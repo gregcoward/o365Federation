@@ -44,7 +44,7 @@
         "description": "The type of auth utilized - password or ssh public key"
       }
     },
-    "vmSize": {
+    "instanceType": {
       "type": "string",
       "defaultValue": "Standard_D3_v2",
       "metadata": {
@@ -154,7 +154,9 @@
     "niId": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicNamePrefix'))]",
     "publicIPName": "[concat(variables('bigipNamePrefix'),'-ip')]",
     "javaName": "runScripts.js",
+    "tarName": "F5Networks-f5-cloud-libs-v1.0.0-0-g89b5478.tar.gz",
     "javaLoc": "[concat(parameters('baseUrl'),'/',variables('javaName'))]",
+    "tarLoc": "[concat(parameters('baseUrl'),'/',variables('tarName'))]",
     "scriptName": "o365FedDeploy.sh",
     "scriptLoc": "[concat(parameters('baseUrl'),'/',variables('scriptName'))]",
     "iappTemplate": "f5.microsoft_office_365_idp.v1.1.0.tmpl",
@@ -166,6 +168,7 @@
     "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
     "publicIpId": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPName'))]",
     "singleQuote": "'",
+    "f5CloudLibsTag": "v1.0.0",
     "commandArgs": "[concat(' -p ',variables('appPort'),' -e ', variables('entityId'),' -d ', parameters('authFqdn'),' -a ', parameters('authIp'),' -f ', parameters('domainfqdn'),' -c ', parameters('sslCert'),' -w ', parameters('sslPswd'),' -x ', parameters('adminPassword'),' -u ', variables('iappUrl'))]"
   },
   "resources": [
@@ -426,8 +429,8 @@
           "sshPublicKey": {
             "value": "[parameters('sshPublicKey')]"
           },
-          "vmSize": {
-            "value": "[parameters('vmSize')]"
+          "instanceType": {
+            "value": "[parameters('instanceType')]"
           },
           "availabilitySetName": {
             "value": "[variables('availabilitySetName')]"
@@ -464,11 +467,12 @@
         "typeHandlerVersion": "2.0",
         "settings": {
           "fileUris": [
-            "[variables('javaLoc')]"
+            "[variables('javaLoc')]",
+            "[variables('tarLoc')]"
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --onboard \" --output /var/log/onboard.log --log-level debug --host ', reference(variables('nicNamePrefix')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(variables('bigipNamePrefix'), '.', parameters('domainFqdn')), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseToken'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module apm:nominal --module afm:none --signal ONBOARD_DONE \" --script \" --wait-for ONBOARD_DONE --output /var/log/runScript.log --log-level debug --url ',variables('scriptLoc'),' --cl-args ', variables('singleQuote'),'-i ',reference(variables('nicNamePrefix')).ipConfigurations[0].properties.privateIpAddress, variables('commandArgs'), variables('singleQuote'), '\"')]"
+          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --tag ', variables('f5CloudLibsTag'), ' --onboard \" --output /var/log/onboard.log --log-level debug --host ', reference(variables('nicNamePrefix')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(variables('bigipNamePrefix'), '.', parameters('domainFqdn')), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseToken'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module apm:nominal --module afm:none --signal ONBOARD_DONE \" --script \" --wait-for ONBOARD_DONE --output /var/log/runScript.log --log-level debug --url ',variables('scriptLoc'),' --cl-args ', variables('singleQuote'),'-i ',reference(variables('nicNamePrefix')).ipConfigurations[0].properties.privateIpAddress, variables('commandArgs'), variables('singleQuote'), '\"')]"
         }
       }
     }

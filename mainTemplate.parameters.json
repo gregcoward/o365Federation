@@ -40,9 +40,9 @@
         "description": "The type of auth utilized - password or ssh public key"
       }
     },
-    "vmSize": {
+    "instanceType": {
       "type": "string",
-      "defaultValue": "Standard_A3",
+      "defaultValue": "Standard_D3_v2",
       "metadata": {
         "description": "The size of the Virtual Hardware Instance."
       }

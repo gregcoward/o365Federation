@@ -50,7 +50,7 @@
         "description": "The ssh public key"
       }
     },
-    "vmSize": {
+    "instanceType": {
       "type": "string",
       "metadata": {
         "description": "The bigip instance size"
@@ -138,7 +138,7 @@
           "id": "[parameters('asId')]"
         },
         "hardwareProfile": {
-          "vmSize": "[parameters('vmSize')]"
+          "vmSize": "[parameters('instanceType')]"
         },
         "osProfile": "[variables(variables('osProfileChosen'))]",
         "storageProfile": {
