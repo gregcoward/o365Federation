@@ -1,6 +1,6 @@
 {
   "handler": "Microsoft.Compute.MultiVm",
-  "version": "0.0.1-preview",
+  "version": "0.1.2-preview",
   "parameters": {
     "basics": [
     ],
@@ -65,50 +65,53 @@
                 "Standard_D5"
               ]
             },
-            "osPlatform": "Linux"
-          },
-          {
-          "name": "virtualNetwork",
-          "type": "Microsoft.Network.VirtualNetworkCombo",
-          "label": {
-            "virtualNetwork": "Virtual network",
-            "subnets": "Subnets"
-          },
-          "toolTip": {
-            "virtualNetwork": "Select an existing creat a new virtual network.",
-            "subnets": ""
-          },
-          "defaultValue": {
-            "name": "Vnet",
-            "addressPrefixSize": "/16"
-          },
-          "constraints": {
-            "minAddressPrefixSize": "/16"
-          },
-          "options": {
-            "hideExisting": false
-          },
-          "subnets": {
-            "subnet1": {
-              "label": "subnetName",
-              "defaultValue": {
-                "name": "subnet1",
-                "addressPrefixSize": "/24"
-              },
-              "constraints": {
-                "minAddressPrefixSize": "/24",
-                "minAddressCount": 12,
-                "requireContiguousAddresses": true
-              }
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "f5-networks",
+              "offer": "f5-big-ip",
+              "sku": "f5-bigip-virtual-edition-best-byol"
             }
           },
-          "visible": true
-        },
+          {
+            "name": "virtualNetwork",
+            "type": "Microsoft.Network.VirtualNetworkCombo",
+            "label": {
+              "virtualNetwork": "Virtual network",
+              "subnets": "Subnets"
+            },
+            "toolTip": {
+              "virtualNetwork": "Select an existing creat a new virtual network.",
+              "subnets": ""
+            },
+            "defaultValue": {
+              "name": "Vnet",
+              "addressPrefixSize": "/16"
+            },
+            "options": {
+              "hideExisting": false
+            },
+            "subnets": {
+              "subnet1": {
+                "label": "subnetName",
+                "defaultValue": {
+                  "name": "subnet1",
+                  "addressPrefixSize": "/24"
+                },
+                "constraints": {
+                  "minAddressPrefixSize": "/24",
+                  "minAddressCount": 12,
+                  "requireContiguousAddresses": true
+                }
+              }
+            },
+            "visible": true
+          },
           {
             "name": "licenseToken",
             "type": "Microsoft.Common.TextBox",
             "label": "BYOL Token",
             "defaultValue": "Required",
+            "regex": "",
             "toolTip": "Enter the F5 BIG-IP License key.",
             "constraints": {
               "required": true
@@ -209,7 +212,7 @@
       "adminUsername": "[steps('bigipSettings').adminUsername]",
       "adminPassword": "[steps('bigipSettings').SSHCredentials.password]",
       "sshPublicKey": "[steps('bigipSettings').SSHCredentials.sshPublicKey]",
-      "authenticationType": "[steps('bigipSettings').SSHCredentials.authenticationType]",      
+      "authenticationType": "[steps('bigipSettings').SSHCredentials.authenticationType]",
       "instanceType": "[steps('bigipSettings').instanceType]",
       "licenseToken": "[steps('bigipSettings').licenseToken]",
       "authFqdn": "[steps('federationSettings').authFqdn]",
