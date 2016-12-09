@@ -113,7 +113,7 @@
             "defaultValue": "Required",
             "toolTip": "Enter the F5 BIG-IP License key.",
             "constraints": {
-              "regex": "^([A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{7}$",
+              "regex": "^[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{7}$",
               "required": true
             }
           }
