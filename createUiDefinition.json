@@ -1,6 +1,6 @@
 {
   "handler": "Microsoft.Compute.MultiVm",
-  "version": "0.1.2-preview",
+  "version": "0.0.1-preview",
   "parameters": {
     "basics": [
     ],
@@ -82,6 +82,9 @@
             "name": "Vnet",
             "addressPrefixSize": "/16"
           },
+          "constraints": {
+            "minAddressPrefixSize": "/16"
+          },
           "options": {
             "hideExisting": false
           },
@@ -108,8 +111,7 @@
             "defaultValue": "Required",
             "toolTip": "Enter the F5 BIG-IP License key.",
             "constraints": {
-              "required": true,
-              "regex": "^[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{7}$"
+              "required": true
             }
           }
         ]
