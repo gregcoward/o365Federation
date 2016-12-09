@@ -108,8 +108,7 @@
             "defaultValue": "Required",
             "toolTip": "Enter the F5 BIG-IP License key.",
             "constraints": {
-              "required": true,
-              "regex": "^[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{7}$"
+              "required": true
             }
           }
         ]
@@ -130,7 +129,8 @@
             "defaultValue": "Required",
             "toolTip": "Enter FQDN of primary AD domain controller used for user authentication.",
             "constraints": {
-              "required": true
+              "required": true,
+              "regex": "^[a-z][a-z0-9-]{1,61}[a-z0-9]$"
             }
           },
           {
@@ -140,8 +140,7 @@
             "defaultValue": "0.0.0.0",
             "toolTip": "Enter IP address of primary AD domain controller used for user authentication.",
             "constraints": {
-              "required": true,
-              "regex": "^[1-254].[1-254].[1-254].[1-254]$"
+              "required": true
             }
           },
           {
@@ -151,7 +150,8 @@
             "defaultValue": "required",
             "toolTip": "Enter federated domain suffix, (for example: 'fdemo.net').",
             "constraints": {
-              "required": true
+              "required": true,
+              "regex": "^[a-z][a-z0-9-]{1,61}[a-z0-9]$"
             }
           },
           {
@@ -161,7 +161,8 @@
             "defaultValue": "required",
             "toolTip": "Enter The public federation endpoint FQDN, (for example: 'fs.fdemo.net').",
             "constraints": {
-              "required": true
+              "required": true,
+              "regex": "^[a-z][a-z0-9-]{1,61}[a-z0-9]$"
             }
           },
           {
