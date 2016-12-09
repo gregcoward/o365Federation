@@ -111,7 +111,7 @@
             "type": "Microsoft.Common.TextBox",
             "label": "BYOL Token",
             "defaultValue": "Required",
-            "regex": "^([A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{7}",
+            "regex": "^([A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{7})",
             "toolTip": "Enter the F5 BIG-IP License key.",
             "constraints": {
               "required": true
