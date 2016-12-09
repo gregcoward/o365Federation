@@ -140,7 +140,8 @@
             "defaultValue": "0.0.0.0",
             "toolTip": "Enter IP address of primary AD domain controller used for user authentication.",
             "constraints": {
-              "required": true
+              "required": true,
+              "regex": "^[1-254].[1-254].[1-254].[1-254]$"
             }
           },
           {
