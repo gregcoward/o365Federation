@@ -113,120 +113,120 @@
             "defaultValue": "Required",
             "toolTip": "Enter the F5 BIG-IP License key.",
             "constraints": {
-              "required": true,
-              "regex": "^([A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{7}"
+              "regex": "^([A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{7}$",
+              "required": true
             }
           }
-        ]
-      },
-      {
-        "name": "federationSettings",
-        "label": "O365 Federation Settings",
-        "subLabel": {
-          "preValidation": "Configure o365 federation settings",
-          "postValidation": "Done"
-        },
-        "bladeTitle": "Office 365 Federation Settings",
-        "elements": [
-          {
-            "name": "authFqdn",
-            "type": "Microsoft.Common.TextBox",
-            "label": "Authentication Domain Controller FQDN",
-            "defaultValue": "Required",
-            "toolTip": "Enter FQDN of primary AD domain controller used for user authentication.",
-            "constraints": {
-              "required": true
-            }
+            ]
           },
           {
-            "name": "authIp",
-            "type": "Microsoft.Common.TextBox",
-            "label": "Authentication Domain Controller IP Address",
-            "defaultValue": "0.0.0.0",
-            "toolTip": "Enter IP address of primary AD domain controller used for user authentication.",
-            "constraints": {
-              "required": true
-            }
-          },
-          {
-            "name": "domainFqdn",
-            "type": "Microsoft.Common.TextBox",
-            "label": "Federated Domain  (ex: 'f5demo.net')",
-            "defaultValue": "required",
-            "toolTip": "Enter federated domain suffix, (for example: 'fdemo.net').",
-            "constraints": {
-              "required": true
-            }
-          },
-          {
-            "name": "dnsFqdn",
-            "type": "Microsoft.Common.TextBox",
-            "label": "Federation IdP Endpoint FQDN",
-            "defaultValue": "required",
-            "toolTip": "Enter The public federation endpoint FQDN, (for example: 'fs.fdemo.net').",
-            "constraints": {
-              "required": true
-            }
-          },
-          {
-            "name": "sslCert",
-            "type": "Microsoft.Common.FileUpload",
-            "label": "SSL Certificate Upload",
-            "defaultValue": "required",
-            "toolTip": "Browse to and select the SSL certificate, (.pfx format) file corresponding to public facing VIP.",
-            "constraints": {
-              "required": true,
-              "accept": ".pfx, .p12"
+            "name": "federationSettings",
+            "label": "O365 Federation Settings",
+            "subLabel": {
+              "preValidation": "Configure o365 federation settings",
+              "postValidation": "Done"
             },
-            "options": {
-              "multiple": false,
-              "uploadMode": "url",
-              "openMode": "text",
-              "encoding": "UTF-8"
-            },
-            "visible": true
-          },
-          {
-            "name": "sslPswd",
-            "type": "Microsoft.Common.PasswordBox",
-            "label": {
-              "password": "Certificate Passphrase",
-              "confirmPassword": "Confirm Passphrase"
-            },
-            "toolTip": "Enter the passphrase to open the .pfx certificate file.",
-            "constraints": {
-              "required": true,
-              "regex": "",
-              "validationMessage": ""
-            },
-            "options": {
-              "hideConfirmation": false
-            },
-            "visible": true
+            "bladeTitle": "Office 365 Federation Settings",
+            "elements": [
+              {
+                "name": "authFqdn",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Authentication Domain Controller FQDN",
+                "defaultValue": "Required",
+                "toolTip": "Enter FQDN of primary AD domain controller used for user authentication.",
+                "constraints": {
+                  "required": true
+                }
+              },
+              {
+                "name": "authIp",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Authentication Domain Controller IP Address",
+                "defaultValue": "0.0.0.0",
+                "toolTip": "Enter IP address of primary AD domain controller used for user authentication.",
+                "constraints": {
+                  "required": true
+                }
+              },
+              {
+                "name": "domainFqdn",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Federated Domain  (ex: 'f5demo.net')",
+                "defaultValue": "required",
+                "toolTip": "Enter federated domain suffix, (for example: 'fdemo.net').",
+                "constraints": {
+                  "required": true
+                }
+              },
+              {
+                "name": "dnsFqdn",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Federation IdP Endpoint FQDN",
+                "defaultValue": "required",
+                "toolTip": "Enter The public federation endpoint FQDN, (for example: 'fs.fdemo.net').",
+                "constraints": {
+                  "required": true
+                }
+              },
+              {
+                "name": "sslCert",
+                "type": "Microsoft.Common.FileUpload",
+                "label": "SSL Certificate Upload",
+                "defaultValue": "required",
+                "toolTip": "Browse to and select the SSL certificate, (.pfx format) file corresponding to public facing VIP.",
+                "constraints": {
+                  "required": true,
+                  "accept": ".pfx, .p12"
+                },
+                "options": {
+                  "multiple": false,
+                  "uploadMode": "url",
+                  "openMode": "text",
+                  "encoding": "UTF-8"
+                },
+                "visible": true
+              },
+              {
+                "name": "sslPswd",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                  "password": "Certificate Passphrase",
+                  "confirmPassword": "Confirm Passphrase"
+                },
+                "toolTip": "Enter the passphrase to open the .pfx certificate file.",
+                "constraints": {
+                  "required": true,
+                  "regex": "",
+                  "validationMessage": ""
+                },
+                "options": {
+                  "hideConfirmation": false
+                },
+                "visible": true
+              }
+            ]
           }
-        ]
+        ],
+        "outputs": {
+          "location": "[location()]",
+          "adminUsername": "[steps('bigipSettings').adminUsername]",
+          "adminPassword": "[steps('bigipSettings').SSHCredentials.password]",
+          "sshPublicKey": "[steps('bigipSettings').SSHCredentials.sshPublicKey]",
+          "authenticationType": "[steps('bigipSettings').SSHCredentials.authenticationType]",
+          "instanceType": "[steps('bigipSettings').instanceType]",
+          "licenseToken": "[steps('bigipSettings').licenseToken]",
+          "authFqdn": "[steps('federationSettings').authFqdn]",
+          "authIp": "[steps('federationSettings').authIp]",
+          "domainFqdn": "[steps('federationSettings').domainFqdn]",
+          "dnsFqdn": "[steps('federationSettings').dnsFqdn]",
+          "sslCert": "[steps('federationSettings').sslCert]",
+          "sslPswd": "[steps('federationSettings').sslPswd]",
+          "vnetName": "[steps('bigipSettings').virtualNetwork.name]",
+          "vnetAddressPrefix": "[steps('bigipSettings').virtualNetwork.addressPrefix]",
+          "subnetName": "[steps('bigipSettings').virtualNetwork.subnets.subnet1.name]",
+          "subnetAddressPrefix": "[steps('bigipSettings').virtualNetwork.subnets.subnet1.addressPrefix]",
+          "vnetNewOrExisting": "[steps('bigipSettings').virtualNetwork.newOrExisting]",
+          "vnetExistingRGName": "[steps('bigipSettings').virtualNetwork.resourceGroup]"
+        }
       }
-    ],
-    "outputs": {
-      "location": "[location()]",
-      "adminUsername": "[steps('bigipSettings').adminUsername]",
-      "adminPassword": "[steps('bigipSettings').SSHCredentials.password]",
-      "sshPublicKey": "[steps('bigipSettings').SSHCredentials.sshPublicKey]",
-      "authenticationType": "[steps('bigipSettings').SSHCredentials.authenticationType]",
-      "instanceType": "[steps('bigipSettings').instanceType]",
-      "licenseToken": "[steps('bigipSettings').licenseToken]",
-      "authFqdn": "[steps('federationSettings').authFqdn]",
-      "authIp": "[steps('federationSettings').authIp]",
-      "domainFqdn": "[steps('federationSettings').domainFqdn]",
-      "dnsFqdn": "[steps('federationSettings').dnsFqdn]",
-      "sslCert": "[steps('federationSettings').sslCert]",
-      "sslPswd": "[steps('federationSettings').sslPswd]",
-      "vnetName": "[steps('bigipSettings').virtualNetwork.name]",
-      "vnetAddressPrefix": "[steps('bigipSettings').virtualNetwork.addressPrefix]",
-      "subnetName": "[steps('bigipSettings').virtualNetwork.subnets.subnet1.name]",
-      "subnetAddressPrefix": "[steps('bigipSettings').virtualNetwork.subnets.subnet1.addressPrefix]",
-      "vnetNewOrExisting": "[steps('bigipSettings').virtualNetwork.newOrExisting]",
-      "vnetExistingRGName": "[steps('bigipSettings').virtualNetwork.resourceGroup]"
-    }
   }
-}
