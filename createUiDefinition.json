@@ -1,6 +1,6 @@
 {
   "handler": "Microsoft.Compute.MultiVm",
-  "version": "0.1.2-preview",
+  "version": "0.0.1-preview",
   "parameters": {
     "basics": [
     ],
@@ -82,6 +82,9 @@
             "name": "Vnet",
             "addressPrefixSize": "/16"
           },
+          "constraints": {
+            "minAddressPrefixSize": "/16"
+          },
           "options": {
             "hideExisting": false
           },
@@ -129,8 +132,7 @@
             "defaultValue": "Required",
             "toolTip": "Enter FQDN of primary AD domain controller used for user authentication.",
             "constraints": {
-              "required": true,
-              "regex": ""
+              "required": true
             }
           },
           {
@@ -150,8 +152,7 @@
             "defaultValue": "required",
             "toolTip": "Enter federated domain suffix, (for example: 'fdemo.net').",
             "constraints": {
-              "required": true,
-              "regex": ""
+              "required": true
             }
           },
           {
@@ -161,8 +162,7 @@
             "defaultValue": "required",
             "toolTip": "Enter The public federation endpoint FQDN, (for example: 'fs.fdemo.net').",
             "constraints": {
-              "required": true,
-              "regex": ""
+              "required": true
             }
           },
           {
