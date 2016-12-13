@@ -145,7 +145,7 @@
             "toolTip": "Enter IP address of primary AD domain controller used for user authentication.",
             "constraints": {
               "required": true,
-              "regex": "^[0-9],{1,3}\\.[0-9],{1,3}\\.[0-9],{1,3}\\.[0-9],{1,3}$"
+              "regex": "^([0-9],{1,3}\\.)+([0-9],{1,3}\\.)+([0-9],{1,3}\\.[0-9],{1,3})$"
             }
           },
           {
