@@ -155,7 +155,7 @@
             "toolTip": "Enter federated domain suffix, (for example: 'fdemo.net').",
             "constraints": {
               "required": true, 
-              "regex": "^((?!-)[A-Za-z0-9-]{1,63}(?<!-)\\.)+[A-Za-z]{2,6}$"
+              "regex": ""
             }
           },
           {
@@ -166,7 +166,7 @@
             "toolTip": "Enter The public federation endpoint FQDN, (for example: 'fs.fdemo.net').",
             "constraints": {
               "required": true,
-              "regex": "^((?!-)[A-Za-z0-9-]{1,63}(?<!-)\\.)+[A-Za-z]{2,6}$"
+              "regex": ""
 
             }
           },
