@@ -134,7 +134,7 @@
             "toolTip": "Enter FQDN of primary AD domain controller used for user authentication.",
             "constraints": {
               "required": true,
-              "regex": "^([a-zA-Z0-9]{1,63}\\.)?[a-zA-Z0-9]{2,6}$"
+              "regex": "^([a-zA-Z0-9]{1,63}\\.)+[a-zA-Z0-9]{2,6}$"
             }
           },
           {
