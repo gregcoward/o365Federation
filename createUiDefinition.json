@@ -130,7 +130,7 @@
             "name": "authFqdn",
             "type": "Microsoft.Common.TextBox",
             "label": "Authentication Domain Controller FQDN",
-            "defaultValue": "mydc.mycompany.com",
+            "defaultValue": "required",
             "toolTip": "Enter FQDN of primary AD domain controller used for user authentication.",
             "constraints": {
               "required": true,
