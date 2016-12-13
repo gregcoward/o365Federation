@@ -144,7 +144,8 @@
             "defaultValue": "0.0.0.0",
             "toolTip": "Enter IP address of primary AD domain controller used for user authentication.",
             "constraints": {
-              "required": true
+              "required": true,
+              "regex": "^[1-254],{1}\\.[1-254],{1}\\.[1-254],{1}\\.[1-254],{1}$"
             }
           },
           {
@@ -155,7 +156,7 @@
             "toolTip": "Enter federated domain suffix, (for example: 'fdemo.net').",
             "constraints": {
               "required": true, 
-              "regex": ""
+              "regex": "^([a-zA-Z0-9-]{1,63}\\.)+[a-zA-Z0-9]{2,6}$"
             }
           },
           {
@@ -166,7 +167,7 @@
             "toolTip": "Enter The public federation endpoint FQDN, (for example: 'fs.fdemo.net').",
             "constraints": {
               "required": true,
-              "regex": ""
+              "regex": "^([a-zA-Z0-9-]{1,63}\\.)+[a-zA-Z0-9]{2,6}$"
 
             }
           },
