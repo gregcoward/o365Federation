@@ -52,10 +52,9 @@
 	"resources": [
 	],
 	"outputs": {
-		
-        "subnetId": {
-            "value": "[variables('subnet1')]",
-            "type": "string"
-        }		
+      "vnetId": {
+        "value": "[variables('vnetID')]",
+        "type": "string"
+      }	
 	}
 }

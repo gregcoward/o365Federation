@@ -73,9 +73,8 @@
       }
     ],
     "outputs": {
-
-      "subnetId": {
-        "value": "[variables('subnet1')]",
+      "vnetId": {
+        "value": "[variables('vnetID')]",
         "type": "string"
       }
     }
