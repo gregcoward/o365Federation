@@ -137,7 +137,7 @@
     }
   },
   "variables": {
-    "apiVersionCompute": "2015-06-15",
+    "apiVersionCompute": "2016-03-30",
     "apiVersionNetwork": "2015-06-15",
     "apiVersionStorage": "2015-06-15",
     "linkTemplateApiVersion": "2015-01-01",
@@ -156,15 +156,16 @@
     "scriptName": "o365FedDeploy.sh",
     "scriptLoc": "[concat(parameters('baseUrl'),'/',variables('scriptName'))]",
     "iappTemplate": "f5.microsoft_office_365_idp.v1.1.0.tmpl",
-    "iappUrl": "[concat('http://cdn.f5.com/product/blackbox/staging/azure/',variables('iappTemplate'))]",
-    "vnetId": "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
-    "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]",
+    "iappUrl": "[concat(parameters('baseUrl'),'/',variables('iappTemplate'))]",
+    "runScripts": "runScripts.js",
+    "runScriptsUrl": "[concat(parameters('baseUrl'),'/',variables('runScripts'))]",
     "asId": "[resourceId('Microsoft.Network/availabilitySets',variables('availabilitySetName'))]",
     "lbId": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]",
     "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
     "publicIpId": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPName'))]",
     "singleQuote": "'",
-    "f5CloudLibsTag": "v1.0.0",
+    "f5CloudLibsTag": "F5Networks-f5-cloud-libs-v1.0.0-0-g9f85e95.tar.gz",
+    "f5CloudLibsTagUrl": "[concat(parameters('baseUrl'),'/',variables('f5CloudLibsTag'))]",
     "commandArgs": "[concat(' -p ',variables('appPort'),' -e ', variables('entityId'),' -d ', parameters('authFqdn'),' -a ', parameters('authIp'),' -f ', parameters('domainfqdn'),' -c ', parameters('sslCert'),' -w ', parameters('sslPswd'),' -x ', parameters('adminPassword'),' -u ', variables('iappUrl'))]"
   },
   "resources": [
@@ -352,7 +353,8 @@
       "dependsOn": [
         "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]",
         "[concat(variables('lbId'),'/inboundNatRules/guimgt')]",
-        "[concat(variables('lbId'),'/inboundNatRules/sshmgt')]"
+        "[concat(variables('lbId'),'/inboundNatRules/sshmgt')]",
+        "virtualNetworkTemplate"
       ],
       "properties": {
         "ipConfigurations": [
@@ -361,7 +363,7 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
-                "id": "[variables('subnetRef')]"
+                "id": "[concat(reference('virtualNetworkTemplate').outputs.vnetID.value,'/subnets/',parameters('subnetName'))]"
               },
               "loadBalancerBackendAddressPools": [
                 {
@@ -432,7 +434,7 @@
             "value": "[variables('availabilitySetName')]"
           },
           "subnetRef": {
-            "value": "[variables('subnetRef')]"
+            "value": "[concat(reference('virtualNetworkTemplate').outputs.vnetID.value,'/subnets/',parameters('subnetName'))]"
           },
           "lbId": {
             "value": "[variables('lbId')]"
@@ -463,8 +465,8 @@
         "typeHandlerVersion": "2.0",
         "settings": {
           "fileUris": [
-            "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/scripts/azure/runScripts.js')]",
-            "[concat('https://api.github.com/repos/F5Networks/f5-cloud-libs/tarball/', variables('f5CloudLibsTag'))]"
+            "[variables('runScriptsUrl')]",
+            "[variables('f5CloudLibsTagUrl')]"
           ]
         },
         "protectedSettings": {
