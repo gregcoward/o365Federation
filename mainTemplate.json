@@ -51,6 +51,12 @@
         "description": "The size of the Virtual Hardware Instance."
       }
     },
+    "licenseModel": {
+      "type": "string",
+      "metadata": {
+        "description": "The licensing model, either hourly or byol."
+      }
+    },
     "licenseToken": {
       "type": "string",
       "metadata": {
@@ -145,7 +151,7 @@
     "entityId": "[concat('https://',trim(parameters('dnsFqdn')),'/idp/f5/')]",
     "vnetLink": "[concat(parameters('baseUrl'),'/',parameters('vnetNewOrExisting'),'vnet.json')]",
     "loadBalancerName": "[concat(variables('bigipNamePrefix'),'-alb')]",
-    "bigipLink": "[concat(parameters('baseUrl'),'/bigip.json')]",
+    "bigipLink": "[concat(parameters('baseUrl'),'/bigip-',parameters('licenseModel'),'.json')]",
     "availabilitySetName": "[concat(variables('bigipNamePrefix'),'-avset')]",
     "appPort": 6443,
     "newStorageAccountName": "[concat(tolower(variables('dnsNameForPublicIP')),'stor')]",

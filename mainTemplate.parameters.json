@@ -14,12 +14,12 @@
       "metadata": {
         "description": "The Azure location hosting the resource"
       }
-    },    
-	  "adminUsername": {
+    },
+    "adminUsername": {
       "type": "string",
       "defaultValue": "azureuser",
       "metadata": {
-      "description": "The BIG-IP administrator username."
+        "description": "The BIG-IP administrator username."
       }
     },
     "adminPassword": {
@@ -45,6 +45,12 @@
       "defaultValue": "Standard_D3_v2",
       "metadata": {
         "description": "The size of the Virtual Hardware Instance."
+      }
+    },
+    "licenseModel": {
+      "type": "string",
+      "metadata": {
+        "description": "The licensing model, either hourly or byol."
       }
     },
     "licenseToken": {

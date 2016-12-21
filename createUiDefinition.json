@@ -51,6 +51,7 @@
             "toolTip": "Select the desired instance size for virtual machine to provision.",
             "recommendedSizes": [
               "Standard_D3_v2",
+              "Standard_DS3_v2",
               "Standard_A3",
               "Standard_A4",
               "Standard_F4"
@@ -58,6 +59,7 @@
             "constraints": {
               "allowedSizes": [
                 "Standard_D3_v2",
+                "Standard_DS3_v2",
                 "Standard_A3",
                 "Standard_A4",
                 "Standard_F4",
@@ -68,51 +70,68 @@
             "osPlatform": "Linux"
           },
           {
-          "name": "virtualNetwork",
-          "type": "Microsoft.Network.VirtualNetworkCombo",
-          "label": {
-            "virtualNetwork": "Virtual network",
-            "subnets": "Subnets"
-          },
-          "toolTip": {
-            "virtualNetwork": "Select an existing creat a new virtual network.",
-            "subnets": ""
-          },
-          "defaultValue": {
-            "name": "Vnet",
-            "addressPrefixSize": "/16"
-          },
-          "constraints": {
-            "minAddressPrefixSize": "/16"
-          },
-          "options": {
-            "hideExisting": false
-          },
-          "subnets": {
-            "subnet1": {
-              "label": "subnetName",
-              "defaultValue": {
-                "name": "subnet1",
-                "addressPrefixSize": "/24"
-              },
-              "constraints": {
-                "minAddressPrefixSize": "/24",
-                "minAddressCount": 12,
-                "requireContiguousAddresses": true
+            "name": "virtualNetwork",
+            "type": "Microsoft.Network.VirtualNetworkCombo",
+            "label": {
+              "virtualNetwork": "Virtual network",
+              "subnets": "Subnets"
+            },
+            "toolTip": {
+              "virtualNetwork": "Select an existing create a new virtual network.",
+              "subnets": ""
+            },
+            "defaultValue": {
+              "name": "Vnet",
+              "addressPrefixSize": "/16"
+            },
+            "constraints": {
+              "minAddressPrefixSize": "/16"
+            },
+            "options": {
+              "hideExisting": false
+            },
+            "subnets": {
+              "subnet1": {
+                "label": "subnetName",
+                "defaultValue": {
+                  "name": "subnet1",
+                  "addressPrefixSize": "/24"
+                },
+                "constraints": {
+                  "minAddressPrefixSize": "/24",
+                  "minAddressCount": 12,
+                  "requireContiguousAddresses": true
+                }
               }
+            },
+            "visible": true
+          },
+          {
+            "name": "licenseModel",
+            "type": "Microsoft.Common.TextBox",
+            "label": "BIG-ip Licensing Model",
+            "defaultValue": "hourly",
+            "toolTip": "Select either hourly or byol.",
+            "allowedValues": [
+              "hourly",
+              "byol"
+            ],
+            "constraints": {
+              "required": true,
+              "validationMessage": "Select either hourly billing or BYOL"
             }
           },
-          "visible": true
-        },
           {
             "name": "licenseToken",
             "type": "Microsoft.Common.TextBox",
             "label": "BYOL Token",
             "defaultValue": "XXXXX-XXXXX-XXXXX-XXXXX-XXXXXXX",
-            "toolTip": "Enter the F5 BIG-IP License key.",
+            "toolTip": "Enter the F5 BIG-IP License key if utilizing BYOL licensing model.",
             "constraints": {
               "required": true,
-              "regex": "^[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{7}$"
+              "regex": "^[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{7}$",
+              "validationMessage": "Provide the BIG-IP licence key in XXXXX-XXXXX-XXXXX-XXXXX-XXXXXXX format."
+
             }
           }
         ]
@@ -134,7 +153,8 @@
             "toolTip": "Enter FQDN of primary AD domain controller used for user authentication.",
             "constraints": {
               "required": true,
-              "regex": "^([a-zA-Z0-9-]{1,63}\\.)+[a-zA-Z0-9]{2,6}$"
+              "regex": "^([a-zA-Z0-9-]{1,63}\\.)+[a-zA-Z0-9]{2,6}$",
+              "validationMessage": "Enter FQDN of primary AD domain controller used for user authentication."
             }
           },
           {
@@ -145,7 +165,8 @@
             "toolTip": "Enter IP address of primary AD domain controller used for user authentication.",
             "constraints": {
               "required": true,
-              "regex": "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$"
+              "regex": "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$",
+              "validationMessage": "Enter a proper IPv4 address"
             }
           },
           {
@@ -155,8 +176,9 @@
             "defaultValue": "required",
             "toolTip": "Enter federated domain suffix, (for example: 'fdemo.net').",
             "constraints": {
-              "required": true, 
-              "regex": "^([a-zA-Z0-9-]{1,63}\\.)+[a-zA-Z0-9]{2,6}$"
+              "required": true,
+              "regex": "^([a-zA-Z0-9-]{1,63}\\.)+[a-zA-Z0-9]{2,6}$",
+              "validationMessage": "Enter domain name.  For example - f5demo.net."
             }
           },
           {
@@ -167,7 +189,8 @@
             "toolTip": "Enter The public federation endpoint FQDN, (for example: 'fs.fdemo.net').",
             "constraints": {
               "required": true,
-              "regex": "^([a-zA-Z0-9-]{1,63}\\.)+[a-zA-Z0-9]{2,6}$"
+              "regex": "^([a-zA-Z0-9-]{1,63}\\.)+[a-zA-Z0-9]{2,6}$",
+              "validationMessage": "Enter FQDN of the federation endpoint."
 
             }
           },
@@ -215,8 +238,9 @@
       "adminUsername": "[steps('bigipSettings').adminUsername]",
       "adminPassword": "[steps('bigipSettings').SSHCredentials.password]",
       "sshPublicKey": "[steps('bigipSettings').SSHCredentials.sshPublicKey]",
-      "authenticationType": "[steps('bigipSettings').SSHCredentials.authenticationType]",      
+      "authenticationType": "[steps('bigipSettings').SSHCredentials.authenticationType]",
       "instanceType": "[steps('bigipSettings').instanceType]",
+      "licenseModel": "[steps('bigipSettings').licenseModel]",
       "licenseToken": "[steps('bigipSettings').licenseToken]",
       "authFqdn": "[steps('federationSettings').authFqdn]",
       "authIp": "[steps('federationSettings').authIp]",
