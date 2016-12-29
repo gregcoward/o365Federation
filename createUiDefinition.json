@@ -134,7 +134,7 @@
             "defaultValue": "XXXXX-XXXXX-XXXXX-XXXXX-XXXXXXX",
             "toolTip": "Enter the F5 BIG-IP License key if utilizing BYOL licensing model.",
             "constraints": {
-              "required": true,
+              "required": false,
               "regex": "^[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{7}$",
               "validationMessage": "Provide the BIG-IP licence key in XXXXX-XXXXX-XXXXX-XXXXX-XXXXXXX format."
 
