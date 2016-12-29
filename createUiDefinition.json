@@ -108,16 +108,22 @@
           },
           {
             "name": "licenseModel",
-            "type": "Microsoft.Common.TextBox",
+            "type": "Microsoft.Common.DropDown",
             "label": "BIG-ip Licensing Model",
             "defaultValue": "hourly",
             "toolTip": "Select either hourly or byol.",
-            "allowedValues": [
-              "hourly",
-              "byol"
-            ],
             "constraints": {
-              "required": true,
+              "allowedValues": [
+              {
+                "label": "Hourly Billing",
+                "value": "hourly"
+              },
+              {
+                "label": "Bring Your Own License",
+                "value": "byol"
+              }
+            ],
+              "visible": true,
               "validationMessage": "Select either hourly billing or BYOL"
             }
           },
