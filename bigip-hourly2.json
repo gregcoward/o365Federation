@@ -181,7 +181,9 @@
       "computerName": "[parameters('bigipNamePrefix')]",
       "adminUsername": "[parameters('adminUsername')]",
       "adminPassword": "[parameters('adminPassword')]"
-    }
+    },
+    "nicName1": "[concat(parameters('nicNamePrefix'),'1')]",
+    "nicName2": "[concat(parameters('nicNamePrefix'),'2')]"
   },
     "resources": [
       {
@@ -226,7 +228,7 @@
           "networkProfile": {
             "networkInterfaces": [
               {
-                "id": "[reference('Microsoft.Network/networkInterfaces',concat(parameters('nicNamePrefix'),'1'))]"
+                "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName1'))]"
               }
             ]
           },
@@ -280,7 +282,7 @@
           "networkProfile": {
             "networkInterfaces": [
               {
-                "id": "[reference('Microsoft.Network/networkInterfaces',concat(parameters('nicNamePrefix'),'2'))]"
+                "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName2'))]"
               }
             ]
           },
