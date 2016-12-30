@@ -92,18 +92,6 @@
         "description": "The network interface id"
       }
     },
-    "niId1": {
-      "type": "string",
-      "metadata": {
-        "description": "The network interface id"
-      }
-    },
-    "niId2": {
-      "type": "string",
-      "metadata": {
-        "description": "The network interface id"
-      }
-    },
     "newStorageAccountName": {
       "type": "string",
       "metadata": {
@@ -238,7 +226,7 @@
           "networkProfile": {
             "networkInterfaces": [
               {
-                "id": "[parameters('niId1')]"
+                "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('nicNamePrefix'),'1'))]"
               }
             ]
           },
@@ -292,7 +280,7 @@
           "networkProfile": {
             "networkInterfaces": [
               {
-            "id": "[parameters('niId2')]"
+                "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('nicNamePrefix'),'2'))]"
               }
             ]
           },
