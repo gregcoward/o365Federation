@@ -92,6 +92,18 @@
         "description": "The network interface id"
       }
     },
+    "niId1": {
+      "type": "string",
+      "metadata": {
+        "description": "The network interface id"
+      }
+    },
+    "niId2": {
+      "type": "string",
+      "metadata": {
+        "description": "The network interface id"
+      }
+    },
     "newStorageAccountName": {
       "type": "string",
       "metadata": {
@@ -181,9 +193,7 @@
       "computerName": "[parameters('bigipNamePrefix')]",
       "adminUsername": "[parameters('adminUsername')]",
       "adminPassword": "[parameters('adminPassword')]"
-    },
-    "nicName1": "[concat(parameters('nicNamePrefix'),'1')]",
-    "nicName2": "[concat(parameters('nicNamePrefix'),'2')]"
+    }
   },
     "resources": [
       {
@@ -228,7 +238,7 @@
           "networkProfile": {
             "networkInterfaces": [
               {
-                "id": "[reference(resourceId('Microsoft.Network/networkInterfaces',variables('nicName1')))]"
+                "id": "[parameters('niId2')]"
               }
             ]
           },
@@ -282,7 +292,7 @@
           "networkProfile": {
             "networkInterfaces": [
               {
-                "id": "[reference(resourceId('Microsoft.Network/networkInterfaces',variables('nicName2')))]"
+            "id": "[parameters('niId2')]"
               }
             ]
           },
