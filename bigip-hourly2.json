@@ -183,66 +183,90 @@
       "adminPassword": "[parameters('adminPassword')]"
     }
   },
-    "resources": [
-      {
-        "apiVersion": "[parameters('apiVersionCompute')]",
-        "type": "Microsoft.Compute/virtualMachines",
-        "name": "[concat(parameters('bigipNamePrefix'),copyindex(1))]",
-        "location": "[parameters('location')]",
-        "tags": {
-          "displayName": "[concat(parameters('bigipNamePrefix'),copyindex(1))]"
-        },
-        "dependsOn": [
-        ],
-        "copy": {
-        "count": "[parameters('numberOfInstances')]",
-        "name": "bigipcopy"
-      },
-        "plan": {
-          "name": "f5-bigip-virtual-edition-1g-best-hourly",
-          "publisher": "f5-networks",
-          "product": "f5-big-ip-hourly"
-        },
-        "properties": {
-          "availabilitySet": {
-            "id": "[parameters('asId')]"
+  "resources": [
+    {
+          "apiVersion": "[parameters('apiVersionCompute')]",
+          "type": "Microsoft.Compute/virtualMachines",
+          "name": "[concat(parameters('bigipNamePrefix'),copyindex(1))]",
+          "location": "[parameters('location')]",
+          "tags": {
+            "displayName": "[concat(parameters('bigipNamePrefix'),copyindex(1))]"
           },
-          "hardwareProfile": {
-            "vmSize": "[parameters('instanceType')]"
+          "dependsOn": [
+          ],
+          "copy": {
+            "count": "[parameters('numberOfInstances')]",
+            "name": "bigipcopy"
           },
-          "osProfile": "[variables(variables('osProfileChosen'))]",
-          "storageProfile": {
-            "imageReference": {
-              "publisher": "f5-networks",
-              "offer": "f5-big-ip-hourly",
-              "sku": "f5-bigip-virtual-edition-1g-best-hourly",
-              "version": "latest"
+          "plan": {
+            "name": "f5-bigip-virtual-edition-1g-best-hourly",
+            "publisher": "f5-networks",
+            "product": "f5-big-ip-hourly"
+          },
+          "properties": {
+            "availabilitySet": {
+              "id": "[parameters('asId')]"
             },
-            "osDisk": {
-              "name": "[concat('osdisk',parameters('bigipNamePrefix'),copyindex(1))]",
-              "vhd": {
-                "uri": "[concat('http://',parameters('newStorageAccountName'),'.blob.core.windows.net/',parameters('newStorageAccountName'),'/osDisk',copyindex(1),'.vhd')]"
+            "hardwareProfile": {
+              "vmSize": "[parameters('instanceType')]"
+            },
+            "osProfile": "[variables(variables('osProfileChosen'))]",
+            "storageProfile": {
+              "imageReference": {
+                "publisher": "f5-networks",
+                "offer": "f5-big-ip-hourly",
+                "sku": "f5-bigip-virtual-edition-1g-best-hourly",
+                "version": "latest"
               },
-              "caching": "ReadWrite",
-              "createOption": "FromImage"
-            }
-          },
-          "networkProfile": {
-            "networkInterfaces": [
-              {
-                "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('nicNamePrefix'),copyindex(1)))]"
+              "osDisk": {
+                "name": "[concat('osdisk',parameters('bigipNamePrefix'),copyindex(1))]",
+                "vhd": {
+                  "uri": "[concat('http://',parameters('newStorageAccountName'),'.blob.core.windows.net/',parameters('newStorageAccountName'),'/osDisk',copyindex(1),'.vhd')]"
+                },
+                "caching": "ReadWrite",
+                "createOption": "FromImage"
               }
-            ]
-          },
-          "diagnosticsProfile": {
-            "bootDiagnostics": {
-              "enabled": true,
-              "storageUri": "[concat('http://',parameters('newstorageAccountName'),'.blob.core.windows.net')]"
+            },
+            "networkProfile": {
+              "networkInterfaces": [
+                {
+                  "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('nicNamePrefix'),copyindex(1)))]"
+                }
+              ]
+            },
+            "diagnosticsProfile": {
+              "bootDiagnostics": {
+                "enabled": true,
+                "storageUri": "[concat('http://',parameters('newstorageAccountName'),'.blob.core.windows.net')]"
+              }
             }
           }
         }
+    {
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "name": "[concat(parameters('bigipNamePrefix'),'1','/start')]",
+        "apiVersion": "[parameters('apiVersionCompute')]",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+          "[concat('Microsoft.Compute/virtualMachines/',parameters('bigipNamePrefix'),'1')]"
+        ],
+        "properties": {
+          "publisher": "Microsoft.Azure.Extensions",
+          "type": "CustomScript",
+          "typeHandlerVersion": "2.0",
+          "settings": {
+            "fileUris": [
+              "[parameters('runScriptsUrl')]",
+              "[parameters('f5CloudLibsTagUrl')]"
+            ]
+          },
+          "protectedSettings": {
+            "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --tag ', parameters('f5CloudLibsTag'), ' --onboard \" --output /var/log/onboard.log --log-level debug --host ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(parameters('bigipNamePrefix'),'1', '.', parameters('domainFqdn')), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseToken1'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module apm:nominal --module afm:none --signal ONBOARD_DONE \" --cluster \" --wait-for ONBOARD_DONE --output /var/log/clusterGroup.log --log-level debug --host ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --create-group --device-group Sync --sync-type sync-failover --device ', concat(parameters('bigipNamePrefix'),'1', '.', parameters('domainFqdn')), ' --auto-sync --save-on-auto-sync --signal SYNC_GROUP_DONE \" --script \" --wait-for SYNC_GROUP_DONE --output /var/log/runScript.log --log-level debug --url ',parameters('scriptLoc'),' --cl-args ', parameters('singleQuote'),'-i ',reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, parameters('commandArgs'), parameters('singleQuote'), '\"')]"
+          }
+        }
       }
-    ],
+  ],
+
     "outputs": {
     }
   }
