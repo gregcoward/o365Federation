@@ -159,32 +159,34 @@
       }
     }
   },
-    "variables": {
-      "niId0": "[resourceId('Microsoft.Network/networkInterfaces',parameters('nicNamePrefix'),'0')]",
-      "niId1": "[resourceId('Microsoft.Network/networkInterfaces',parameters('nicNamePrefix'),'1')]",
-      "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
-      "osProfileChosen": "[concat('osProfile', parameters('authenticationType'))]",
-      "osProfilesshPublicKey": {
-        "computerName": "[parameters('bigipNamePrefix')]",
-        "adminUsername": "[parameters('adminUsername')]",
-        "linuxConfiguration": {
-          "disablePasswordAuthentication": "true",
-          "ssh": {
-            "publicKeys": [
-              {
-                "keyData": "[parameters('sshPublicKey')]",
-                "path": "[variables('sshKeyPath')]"
-              }
-            ]
-          }
+  "variables": {
+    "niId": {
+      "0": "[resourceId('Microsoft.Network/networkInterfaces',parameters('nicNamePrefix'),'0')]",
+      "1": "[resourceId('Microsoft.Network/networkInterfaces',parameters('nicNamePrefix'),'1')]"
+    },
+    "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
+    "osProfileChosen": "[concat('osProfile', parameters('authenticationType'))]",
+    "osProfilesshPublicKey": {
+      "computerName": "[parameters('bigipNamePrefix')]",
+      "adminUsername": "[parameters('adminUsername')]",
+      "linuxConfiguration": {
+        "disablePasswordAuthentication": "true",
+        "ssh": {
+          "publicKeys": [
+            {
+              "keyData": "[parameters('sshPublicKey')]",
+              "path": "[variables('sshKeyPath')]"
+            }
+          ]
         }
-      },
-      "osProfilepassword": {
-        "computerName": "[parameters('bigipNamePrefix')]",
-        "adminUsername": "[parameters('adminUsername')]",
-        "adminPassword": "[parameters('adminPassword')]"
       }
     },
+    "osProfilepassword": {
+      "computerName": "[parameters('bigipNamePrefix')]",
+      "adminUsername": "[parameters('adminUsername')]",
+      "adminPassword": "[parameters('adminPassword')]"
+    }
+  },
     "resources": [
       {
         "apiVersion": "[parameters('apiVersionCompute')]",
@@ -232,7 +234,7 @@
           "networkProfile": {
             "networkInterfaces": [
               {
-                "id": "[resourceId('Microsoft.Network/networkInterfaces',parameters('nicNamePrefix'),copyIndex())]"
+                "id": "[concat(variables('niId'),'.',copyIndex())]"
               }
             ]
           },
