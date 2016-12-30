@@ -17,6 +17,14 @@
         "description": "The Azure location hosting the resource"
       }
     },
+    "numberOfInstances": {
+      "type": "int",
+      "defaultValue": 2,
+      "allowedValues": [ 2 ],
+      "metadata": {
+        "description": "The number of F5 BIG-IPs that will be deployed as federation servers."
+      }
+    },
     "adminUsername": {
       "type": "string",
       "defaultValue": "azureuser",
@@ -57,10 +65,16 @@
         "description": "The licensing model, either hourly or byol."
       }
     },
-    "licenseToken": {
+    "licenseToken1": {
       "type": "string",
       "metadata": {
-        "description": "The License Token for the first BYOL F5 Web Application Firewall."
+        "description": "The License Token for the first F5 BIG-IP."
+      }
+    },
+    "licenseToken2": {
+      "type": "string",
+      "metadata": {
+        "description": "The License Token for the second BYOL F5 BIG-IP."
       }
     },
     "authFqdn": {
@@ -151,13 +165,12 @@
     "entityId": "[concat('https://',trim(parameters('dnsFqdn')),'/idp/f5/')]",
     "vnetLink": "[concat(parameters('baseUrl'),'/',parameters('vnetNewOrExisting'),'vnet.json')]",
     "loadBalancerName": "[concat(variables('bigipNamePrefix'),'-alb')]",
-    "bigipLink": "[concat(parameters('baseUrl'),'/bigip-',parameters('licenseModel'),'.json')]",
+    "bigipLink": "[concat(parameters('baseUrl'),'/bigip-',parameters('licenseModel'),parameters('numberOfInstances'),'.json')]",
     "availabilitySetName": "[concat(variables('bigipNamePrefix'),'-avset')]",
     "appPort": 6443,
     "newStorageAccountName": "[concat(tolower(variables('dnsNameForPublicIP')),'stor')]",
     "bigipNamePrefix": "bigip",
     "nicNamePrefix": "bigip-nic",
-    "niId": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicNamePrefix'))]",
     "publicIPName": "[concat(variables('bigipNamePrefix'),'-ip')]",
     "scriptName": "o365FedDeploy.sh",
     "scriptLoc": "[concat(parameters('baseUrl'),'/',variables('scriptName'))]",
@@ -312,8 +325,12 @@
         "displayName": "InboundNATRulesGUI"
       },
       "type": "Microsoft.Network/loadBalancers/inboundNatRules",
-      "name": "[concat(variables('loadBalancerName'),'/guimgt')]",
+      "name": "[concat(variables('loadBalancerName'),'/guimgt', copyIndex())]",
       "location": "[parameters('location')]",
+      "copy": {
+        "name": "lbNatLoop",
+        "count": "[parameters('numberOfInstances')]"
+      },
       "dependsOn": [
         "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]"
       ],
@@ -322,7 +339,7 @@
           "id": "[concat(variables('frontEndIPConfigID'), '1')]"
         },
         "protocol": "tcp",
-        "frontendPort": 8443,
+        "frontendPort": "[copyIndex(8443)]",
         "backendPort": 443,
         "enableFloatingIP": false
       }
@@ -333,8 +350,12 @@
         "displayName": "InboundNATRulesSSH"
       },
       "type": "Microsoft.Network/loadBalancers/inboundNatRules",
-      "name": "[concat(variables('loadBalancerName'),'/sshmgt')]",
+      "name": "[concat(variables('loadBalancerName'),'/sshmgt', copyIndex())]",
       "location": "[parameters('location')]",
+      "copy": {
+        "name": "lbNatLoop",
+        "count": "[parameters('numberOfInstances')]"
+      },
       "dependsOn": [
         "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]"
       ],
@@ -343,7 +364,7 @@
           "id": "[concat(variables('frontEndIPConfigID'), '1')]"
         },
         "protocol": "tcp",
-        "frontendPort": 8022,
+        "frontendPort": "[copyIndex(8022)]",
         "backendPort": 22,
         "enableFloatingIP": false
       }
@@ -351,17 +372,21 @@
     {
       "apiVersion": "[variables('apiVersionNetwork')]",
       "type": "Microsoft.Network/networkInterfaces",
-      "name": "[variables('nicNamePrefix')]",
+      "name": "[concat(variables('nicNamePrefix'),copyindex())]",
       "location": "[parameters('location')]",
       "tags": {
         "displayName": "NetworkInterface"
       },
       "dependsOn": [
         "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]",
-        "[concat(variables('lbId'),'/inboundNatRules/guimgt')]",
-        "[concat(variables('lbId'),'/inboundNatRules/sshmgt')]",
+        "[concat(variables('lbId'),'/inboundNatRules/guimgt',copyindex())]",
+        "[concat(variables('lbId'),'/inboundNatRules/sshmgt',copyindex())]",
         "virtualNetworkTemplate"
       ],
+      "copy": {
+        "count": "[parameters('numberOfInstances')]",
+        "name": "niccopy"
+      },
       "properties": {
         "ipConfigurations": [
           {
@@ -379,10 +404,10 @@
 
               "loadBalancerInboundNatRules": [
                 {
-                  "id": "[concat(variables('lbId'), '/inboundNatRules/', 'sshmgt')]"
+                  "id": "[concat(variables('lbId'), '/inboundNatRules/', 'sshmgt',copyIndex())]"
                 },
                 {
-                  "id": "[concat(variables('lbId'), '/inboundNatRules/', 'guimgt')]"
+                  "id": "[concat(variables('lbId'), '/inboundNatRules/', 'guimgt',copyIndex())]"
                 }
               ]
             }
@@ -448,35 +473,42 @@
           "asId": {
             "value": "[variables('asId')]"
           },
-          "niId": {
-            "value": "[variables('niId')]"
+          "nicNamePrefix": {
+            "value": "[variables('nicNamePrefix')]"
           },
           "newStorageAccountName": {
             "value": "[variables('newStorageAccountName')]"
+          },
+          "singleQuote": {
+            "value": "[variables('singleQuote')]"
+          },
+          "f5CloudLibsTag": {
+            "value": "[variables('f5CloudLibsTag')]"
+          },
+          "f5CloudLibsTagUrl": {
+            "value": "[variables('f5CloudLibsTagUrl')]"
+          },
+          "runScripts": {
+            "value": "[variables('runScripts')]"
+          },
+          "runScriptsUrl": {
+            "value": "[variables('runScriptsUrl')]"
+          },
+          "scriptLoc": {
+            "value": "[variables('scriptLoc')]"
+          },
+          "commandArgs": {
+            "value": "[variables('commandArgs')]"
+          },
+          "domainFqdn": {
+            "value": "[parameters('domainFqdn')]"
+          },
+          "licenseToken1": {
+            "value": "[parameters('licenseToken1')]"
+          },
+          "licenseToken2":{
+            "value": "[parameters('licenseToken2')]"
           }
-        }
-      }
-    },
-    {
-      "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('bigipNamePrefix'),'/start')]",
-      "apiVersion": "[variables('apiVersionCompute')]",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "bigipDeployTemplate"
-      ],
-      "properties": {
-        "publisher": "Microsoft.Azure.Extensions",
-        "type": "CustomScript",
-        "typeHandlerVersion": "2.0",
-        "settings": {
-          "fileUris": [
-            "[variables('runScriptsUrl')]",
-            "[variables('f5CloudLibsTagUrl')]"
-          ]
-        },
-        "protectedSettings": {
-          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --tag ', variables('f5CloudLibsTag'), ' --onboard \" --output /var/log/onboard.log --log-level debug --host ', reference(variables('nicNamePrefix')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(variables('bigipNamePrefix'), '.', parameters('domainFqdn')), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseToken'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module apm:nominal --module afm:none --signal ONBOARD_DONE \" --script \" --wait-for ONBOARD_DONE --output /var/log/runScript.log --log-level debug --url ',variables('scriptLoc'),' --cl-args ', variables('singleQuote'),'-i ',reference(variables('nicNamePrefix')).ipConfigurations[0].properties.privateIpAddress, variables('commandArgs'), variables('singleQuote'), '\"')]"
         }
       }
     }
