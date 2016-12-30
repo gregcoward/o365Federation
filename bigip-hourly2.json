@@ -241,7 +241,7 @@
               }
             }
           }
-        }
+        },
     {
         "type": "Microsoft.Compute/virtualMachines/extensions",
         "name": "[concat(parameters('bigipNamePrefix'),'1','/start')]",
