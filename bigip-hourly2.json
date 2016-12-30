@@ -187,67 +187,17 @@
       {
         "apiVersion": "[parameters('apiVersionCompute')]",
         "type": "Microsoft.Compute/virtualMachines",
-        "name": "[concat(parameters('bigipNamePrefix'),'1')]",
+        "name": "[concat(parameters('bigipNamePrefix'),copyindex(1))]",
         "location": "[parameters('location')]",
         "tags": {
-          "displayName": "BIG-IP1"
+          "displayName": "[concat(parameters('bigipNamePrefix'),copyindex(1))]"
         },
         "dependsOn": [
         ],
-        "plan": {
-          "name": "f5-bigip-virtual-edition-1g-best-hourly",
-          "publisher": "f5-networks",
-          "product": "f5-big-ip-hourly"
-        },
-        "properties": {
-          "availabilitySet": {
-            "id": "[parameters('asId')]"
-          },
-          "hardwareProfile": {
-            "vmSize": "[parameters('instanceType')]"
-          },
-          "osProfile": "[variables(variables('osProfileChosen'))]",
-          "storageProfile": {
-            "imageReference": {
-              "publisher": "f5-networks",
-              "offer": "f5-big-ip-hourly",
-              "sku": "f5-bigip-virtual-edition-1g-best-hourly",
-              "version": "latest"
-            },
-            "osDisk": {
-              "name": "[concat('osdisk',parameters('bigipNamePrefix'),'1')]",
-              "vhd": {
-                "uri": "[concat('http://',parameters('newStorageAccountName'),'.blob.core.windows.net/',parameters('newStorageAccountName'),'/osDisk1.vhd')]"
-              },
-              "caching": "ReadWrite",
-              "createOption": "FromImage"
-            }
-          },
-          "networkProfile": {
-            "networkInterfaces": [
-              {
-                "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('nicNamePrefix'),'1'))]"
-              }
-            ]
-          },
-          "diagnosticsProfile": {
-            "bootDiagnostics": {
-              "enabled": true,
-              "storageUri": "[concat('http://',parameters('newstorageAccountName'),'.blob.core.windows.net')]"
-            }
-          }
-        }
+        "copy": {
+        "count": "[parameters('numberOfInstances')]",
+        "name": "bigipcopy"
       },
-      {
-        "apiVersion": "[parameters('apiVersionCompute')]",
-        "type": "Microsoft.Compute/virtualMachines",
-        "name": "[concat(parameters('bigipNamePrefix'),'2')]",
-        "location": "[parameters('location')]",
-        "tags": {
-          "displayName": "BIG-IP2"
-        },
-        "dependsOn": [
-        ],
         "plan": {
           "name": "f5-bigip-virtual-edition-1g-best-hourly",
           "publisher": "f5-networks",
@@ -269,9 +219,9 @@
               "version": "latest"
             },
             "osDisk": {
-              "name": "[concat('osdisk',parameters('bigipNamePrefix'),'2')]",
+              "name": "[concat('osdisk',parameters('bigipNamePrefix'),copyindex(1))]",
               "vhd": {
-                "uri": "[concat('http://',parameters('newStorageAccountName'),'.blob.core.windows.net/',parameters('newStorageAccountName'),'/osDisk2.vhd')]"
+                "uri": "[concat('http://',parameters('newStorageAccountName'),'.blob.core.windows.net/',parameters('newStorageAccountName'),'/osDisk',copyindex(1),'.vhd')]"
               },
               "caching": "ReadWrite",
               "createOption": "FromImage"
@@ -280,7 +230,7 @@
           "networkProfile": {
             "networkInterfaces": [
               {
-                "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('nicNamePrefix'),'2'))]"
+                "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('nicNamePrefix'),copyindex(1)))]"
               }
             ]
           },
