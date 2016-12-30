@@ -238,7 +238,7 @@
           "networkProfile": {
             "networkInterfaces": [
               {
-                "id": "[parameters('niId2')]"
+                "id": "[parameters('niId1')]"
               }
             ]
           },
