@@ -226,7 +226,7 @@
           "networkProfile": {
             "networkInterfaces": [
               {
-                "id": "[reference(concat('Microsoft.Network/networkInterfaces',parameters('nicNamePrefix'),'1'))]"
+                "id": "[reference('Microsoft.Network/networkInterfaces',concat(parameters('nicNamePrefix'),'1'))]"
               }
             ]
           },
@@ -280,7 +280,7 @@
           "networkProfile": {
             "networkInterfaces": [
               {
-                "id": "[reference(concat('Microsoft.Network/networkInterfaces',parameters('nicNamePrefix'),'2'))]"
+                "id": "[reference('Microsoft.Network/networkInterfaces',concat(parameters('nicNamePrefix'),'2'))]"
               }
             ]
           },
