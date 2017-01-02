@@ -122,18 +122,6 @@
         "description": ""
       }
     },
-    "startScript1": {
-      "type": "string",
-      "metadata": {
-        "description": ""
-      }
-    },
-    "startScript2": {
-      "type": "string",
-      "metadata": {
-        "description": ""
-      }
-    },
     "runScripts": {
       "type": "string",
       "metadata": {
