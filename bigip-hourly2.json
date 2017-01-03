@@ -68,12 +68,6 @@
         "description": "The bigip availability set"
       }
     },
-    "subnetName": {
-      "type": "string",
-      "metadata": {
-        "description": "The subnet name where bigip is hosted"
-      }
-    },
     "asId": {
       "type": "string",
       "metadata": {
