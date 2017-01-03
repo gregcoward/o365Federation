@@ -13,7 +13,7 @@
       "metadata": {
         "description": "The number of F5 BIG-IPs that will be deployed as federation servers."
       }
-    }
+    },
     "location": {
       "type": "string",
       "metadata": {
