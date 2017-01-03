@@ -203,7 +203,7 @@
     }
   },
   "resources": [
-   {
+    {
       "apiVersion": "[parameters('apiVersionNetwork')]",
       "tags": {
         "displayName": "InboundNATRulesGUI"
@@ -229,31 +229,6 @@
       }
     },
     {
-      "apiVersion": "[parameters('apiVersionNetwork')]",
-      "tags": {
-        "displayName": "InboundNATRulesSSH"
-      },
-      "type": "Microsoft.Network/loadBalancers/inboundNatRules",
-      "name": "[concat(parameters('loadBalancerName'),'/sshmgt', copyIndex(1))]",
-      "location": "[parameters('location')]",
-      "copy": {
-        "name": "lbNatLoop",
-        "count": "[parameters('numberOfInstances')]"
-      },
-      "dependsOn": [
-        "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]"
-      ],
-      "properties": {
-        "frontendIPConfiguration": {
-          "id": "[concat(parameters('frontEndIPConfigID'), '1')]"
-        },
-        "protocol": "tcp",
-        "frontendPort": "[copyIndex(8022)]",
-        "backendPort": 22,
-        "enableFloatingIP": false
-      }
-    },
-    {
       "apiVersion": "parameters('apiVersionNetwork')]",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[concat(parameters('nicNamePrefix'),copyindex(1))]",
@@ -264,8 +239,7 @@
       "dependsOn": [
         "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]",
         "[concat(parameters('lbId'),'/inboundNatRules/guimgt',copyindex(1))]",
-        "[concat(parameters('lbId'),'/inboundNatRules/sshmgt',copyindex(1))]",
-        "virtualNetworkTemplate"
+        "[concat(parameters('lbId'),'/inboundNatRules/sshmgt',copyindex(1))]"
       ],
       "copy": {
         "count": "[parameters('numberOfInstances')]",
@@ -298,8 +272,33 @@
           }
         ]
       }
+    }, 
+    {
+      "apiVersion": "[parameters('apiVersionNetwork')]",
+      "tags": {
+        "displayName": "InboundNATRulesSSH"
+      },
+      "type": "Microsoft.Network/loadBalancers/inboundNatRules",
+      "name": "[concat(parameters('loadBalancerName'),'/sshmgt', copyIndex(1))]",
+      "location": "[parameters('location')]",
+      "copy": {
+        "name": "lbNatLoop",
+        "count": "[parameters('numberOfInstances')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]"
+      ],
+      "properties": {
+        "frontendIPConfiguration": {
+          "id": "[concat(parameters('frontEndIPConfigID'), '1')]"
+        },
+        "protocol": "tcp",
+        "frontendPort": "[copyIndex(8022)]",
+        "backendPort": 22,
+        "enableFloatingIP": false
+      }
     },
-      {
+    {
       "apiVersion": "[parameters('apiVersionCompute')]",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[concat(parameters('bigipNamePrefix'),copyindex(1))]",
