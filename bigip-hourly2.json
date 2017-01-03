@@ -229,31 +229,7 @@
           }
         }
       }
-    },
-    {
-        "type": "Microsoft.Compute/virtualMachines/extensions",
-        "name": "[concat(parameters('bigipNamePrefix'),'1','/start')]",
-        "apiVersion": "[parameters('apiVersionCompute')]",
-        "location": "[parameters('location')]",
-        "dependsOn": [
-          "[concat('Microsoft.Compute/virtualMachines/',parameters('bigipNamePrefix'),'1')]"
-        ],
-        "properties": {
-          "publisher": "Microsoft.Azure.Extensions",
-          "type": "CustomScript",
-          "typeHandlerVersion": "2.0",
-          "settings": {
-            "fileUris": [
-              "[parameters('runScriptsUrl')]",
-              "[parameters('f5CloudLibsTagUrl')]"
-            ]
-          },
-          "protectedSettings": {
-            "commandToExecute": ""
-          }
-        }
-      }
-
+    }
   ],
 
     "outputs": {
