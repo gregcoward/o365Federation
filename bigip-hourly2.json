@@ -13,13 +13,7 @@
       "metadata": {
         "description": "The number of F5 BIG-IPs that will be deployed as federation servers."
       }
-    },
-    "apiVersionNetwork": {
-      "type": "string",
-      "metadata": {
-        "description": "The network api version"
-      }
-    },
+    }
     "location": {
       "type": "string",
       "metadata": {
@@ -84,66 +78,6 @@
       "type": "string",
       "metadata": {
         "description": "The storage account hosting bigip"
-      }
-    },
-    "singleQuote": {
-      "type": "string",
-      "metadata": {
-        "description": ""
-      }
-    },
-    "f5CloudLibsTag": {
-      "type": "string",
-      "metadata": {
-        "description": ""
-      }
-    },
-    "f5CloudLibsTagUrl": {
-      "type": "string",
-      "metadata": {
-        "description": ""
-      }
-    },
-    "commandArgs": {
-      "type": "string",
-      "metadata": {
-        "description": ""
-      }
-    },
-    "runScripts": {
-      "type": "string",
-      "metadata": {
-        "description": ""
-      }
-    },
-    "runScriptsUrl": {
-      "type": "string",
-      "metadata": {
-        "description": ""
-      }
-    },
-    "scriptLoc": {
-      "type": "string",
-      "metadata": {
-        "description": ""
-      }
-    },
-    "domainFqdn": {
-      "type": "string",
-      "metadata": {
-        "description": ""
-      }
-    },
-    "licenseToken1": {
-      "type": "string",
-      "metadata": {
-        "description": ""
-      }
-    },
-    "licenseToken2": {
-      "type": "string",
-      "metadata": {
-        "description": ""
       }
     }
   },
