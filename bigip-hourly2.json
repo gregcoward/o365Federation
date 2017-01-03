@@ -8,18 +8,6 @@
         "description": "The compute api version"
       }
     },
-    "frontEndIPConfigID": {
-      "type": "string",
-      "metadata": {
-        "description": "The loadbalancer frontend ID"
-      }
-    },
-    "loadBalancerName": {
-      "type": "string",
-      "metadata": {
-        "description": "The load balancer name"
-      }
-    },
     "numberOfInstances": {
       "type": "int",
       "metadata": {
@@ -84,19 +72,6 @@
       "type": "string",
       "metadata": {
         "description": "The subnet name where bigip is hosted"
-      }
-    },
-
-    "subnetRef": {
-      "type": "string",
-      "metadata": {
-        "description": "The subnet reference where bigip is hosted"
-      }
-    },
-    "lbId": {
-      "type": "string",
-      "metadata": {
-        "description": "The load balancer id"
       }
     },
     "asId": {
@@ -204,101 +179,6 @@
   },
   "resources": [
     {
-      "apiVersion": "[parameters('apiVersionNetwork')]",
-      "tags": {
-        "displayName": "InboundNATRulesSSH"
-      },
-      "type": "Microsoft.Network/loadBalancers/inboundNatRules",
-      "name": "[concat(parameters('loadBalancerName'),'/sshmgt', copyIndex(1))]",
-      "location": "[parameters('location')]",
-      "copy": {
-        "name": "lbNatLoop",
-        "count": "[parameters('numberOfInstances')]"
-      },
-      "dependsOn": [
-        "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]"
-      ],
-      "properties": {
-        "frontendIPConfiguration": {
-          "id": "[concat(parameters('frontEndIPConfigID'), '1')]"
-        },
-        "protocol": "tcp",
-        "frontendPort": "[copyIndex(8022)]",
-        "backendPort": 22,
-        "enableFloatingIP": false
-      }
-    },
-    {
-      "apiVersion": "[parameters('apiVersionNetwork')]",
-      "tags": {
-        "displayName": "InboundNATRulesGUI"
-      },
-      "type": "Microsoft.Network/loadBalancers/inboundNatRules",
-      "name": "[concat(parameters('loadBalancerName'),'/guimgt', copyIndex(1))]",
-      "location": "[parameters('location')]",
-      "copy": {
-        "name": "lbNatLoop",
-        "count": "[parameters('numberOfInstances')]"
-      },
-      "dependsOn": [
-        "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]"
-      ],
-      "properties": {
-        "frontendIPConfiguration": {
-          "id": "[concat(parameters('frontEndIPConfigID'), '1')]"
-        },
-        "protocol": "tcp",
-        "frontendPort": "[copyIndex(8443)]",
-        "backendPort": 443,
-        "enableFloatingIP": false
-      }
-    },
-    {
-      "apiVersion": "parameters('apiVersionNetwork')]",
-      "type": "Microsoft.Network/networkInterfaces",
-      "name": "[concat(parameters('nicNamePrefix'),copyindex(1))]",
-      "location": "[parameters('location')]",
-      "tags": {
-        "displayName": "NetworkInterface"
-      },
-      "dependsOn": [
-        "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]",
-        "[concat(parameters('lbId'),'/inboundNatRules/guimgt',copyindex(1))]",
-        "[concat(parameters('lbId'),'/inboundNatRules/sshmgt',copyindex(1))]"
-      ],
-      "copy": {
-        "count": "[parameters('numberOfInstances')]",
-        "name": "niccopy"
-      },
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig1",
-            "properties": {
-              "privateIPAllocationMethod": "Dynamic",
-              "subnet": {
-                "id": "[parameters('subnetRef')]"
-              },
-              "loadBalancerBackendAddressPools": [
-                {
-                  "id": "[concat(parameters('lbId'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
-                }
-              ],
-
-              "loadBalancerInboundNatRules": [
-                {
-                  "id": "[concat(parameters('lbId'), '/inboundNatRules/', 'sshmgt',copyIndex(1))]"
-                },
-                {
-                  "id": "[concat(parameters('lbId'), '/inboundNatRules/', 'guimgt',copyIndex(1))]"
-                }
-              ]
-            }
-          }
-        ]
-      }
-    },
-    {
       "apiVersion": "[parameters('apiVersionCompute')]",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[concat(parameters('bigipNamePrefix'),copyindex(1))]",
@@ -355,30 +235,7 @@
           }
         }
       }
-    },
-    {
-        "type": "Microsoft.Compute/virtualMachines/extensions",
-        "name": "[concat(parameters('bigipNamePrefix'),'1','/start')]",
-        "apiVersion": "[parameters('apiVersionCompute')]",
-        "location": "[parameters('location')]",
-        "dependsOn": [
-          "[concat('Microsoft.Compute/virtualMachines/',parameters('bigipNamePrefix'),'1')]"
-        ],
-        "properties": {
-          "publisher": "Microsoft.Azure.Extensions",
-          "type": "CustomScript",
-          "typeHandlerVersion": "2.0",
-          "settings": {
-            "fileUris": [
-              "[parameters('runScriptsUrl')]",
-              "[parameters('f5CloudLibsTagUrl')]"
-            ]
-          },
-          "protectedSettings": {
-            "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --tag ', parameters('f5CloudLibsTag'), ' --onboard \" --output /var/log/onboard.log --log-level debug --host ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(parameters('bigipNamePrefix'),'1', '.', parameters('domainFqdn')), ' --set-password admin:', parameters('adminPassword'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module apm:nominal --module afm:none --signal ONBOARD_DONE \" --cluster \" --wait-for ONBOARD_DONE --output /var/log/clusterGroup.log --log-level debug --host ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --create-group --device-group Sync --sync-type sync-failover --device ', concat(parameters('bigipNamePrefix'),'1', '.', parameters('domainFqdn')), ' --auto-sync --save-on-auto-sync --signal SYNC_GROUP_DONE \" --script \" --wait-for SYNC_GROUP_DONE --output /var/log/runScript.log --log-level debug --url ',parameters('scriptLoc'),' --cl-args ', parameters('singleQuote'),'-i ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, parameters('commandArgs'), parameters('singleQuote'), '\"')]"
-          }
-        }
-      }
+    }
   ],
 
     "outputs": {
