@@ -206,6 +206,31 @@
     {
       "apiVersion": "[parameters('apiVersionNetwork')]",
       "tags": {
+        "displayName": "InboundNATRulesSSH"
+      },
+      "type": "Microsoft.Network/loadBalancers/inboundNatRules",
+      "name": "[concat(parameters('loadBalancerName'),'/sshmgt', copyIndex(1))]",
+      "location": "[parameters('location')]",
+      "copy": {
+        "name": "lbNatLoop",
+        "count": "[parameters('numberOfInstances')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]"
+      ],
+      "properties": {
+        "frontendIPConfiguration": {
+          "id": "[concat(parameters('frontEndIPConfigID'), '1')]"
+        },
+        "protocol": "tcp",
+        "frontendPort": "[copyIndex(8022)]",
+        "backendPort": 22,
+        "enableFloatingIP": false
+      }
+    },
+    {
+      "apiVersion": "[parameters('apiVersionNetwork')]",
+      "tags": {
         "displayName": "InboundNATRulesGUI"
       },
       "type": "Microsoft.Network/loadBalancers/inboundNatRules",
@@ -252,7 +277,7 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
-                "id": "[concat(reference('virtualNetworkTemplate').outputs.vnetID.value,'/subnets/',parameters('subnetName'))]"
+                "id": "[parameters('subnetRef')]"
               },
               "loadBalancerBackendAddressPools": [
                 {
@@ -271,31 +296,6 @@
             }
           }
         ]
-      }
-    }, 
-    {
-      "apiVersion": "[parameters('apiVersionNetwork')]",
-      "tags": {
-        "displayName": "InboundNATRulesSSH"
-      },
-      "type": "Microsoft.Network/loadBalancers/inboundNatRules",
-      "name": "[concat(parameters('loadBalancerName'),'/sshmgt', copyIndex(1))]",
-      "location": "[parameters('location')]",
-      "copy": {
-        "name": "lbNatLoop",
-        "count": "[parameters('numberOfInstances')]"
-      },
-      "dependsOn": [
-        "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]"
-      ],
-      "properties": {
-        "frontendIPConfiguration": {
-          "id": "[concat(parameters('frontEndIPConfigID'), '1')]"
-        },
-        "protocol": "tcp",
-        "frontendPort": "[copyIndex(8022)]",
-        "backendPort": 22,
-        "enableFloatingIP": false
       }
     },
     {
