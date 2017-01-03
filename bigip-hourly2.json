@@ -229,7 +229,30 @@
           }
         }
       }
-    }
+    },
+    {
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "name": "[concat(parameters('bigipNamePrefix'),'1','/start')]",
+        "apiVersion": "[parameters('apiVersionCompute')]",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+          "[concat('Microsoft.Compute/virtualMachines/',parameters('bigipNamePrefix'),'1')]"
+        ],
+        "properties": {
+          "publisher": "Microsoft.Azure.Extensions",
+          "type": "CustomScript",
+          "typeHandlerVersion": "2.0",
+          "settings": {
+            "fileUris": [
+              "[parameters('runScriptsUrl')]",
+              "[parameters('f5CloudLibsTagUrl')]"
+            ]
+          },
+          "protectedSettings": {
+            "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --tag ', parameters('f5CloudLibsTag'), ' --onboard \" --output /var/log/onboard.log --log-level debug --host ', concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(parameters('bigipNamePrefix'),'1', '.', parameters('domainFqdn')), ' --set-password admin:', parameters('adminPassword'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module apm:nominal --module afm:none --signal ONBOARD_DONE \" --cluster \" --wait-for ONBOARD_DONE --output /var/log/clusterGroup.log --log-level debug --host ', concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --create-group --device-group Sync --sync-type sync-failover --device ', concat(parameters('bigipNamePrefix'),'1', '.', parameters('domainFqdn')), ' --auto-sync --save-on-auto-sync --signal SYNC_GROUP_DONE \" --script \" --wait-for SYNC_GROUP_DONE --output /var/log/runScript.log --log-level debug --url ',parameters('scriptLoc'),' --cl-args ', parameters('singleQuote'),'-i ', concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, parameters('commandArgs'), parameters('singleQuote'), '\"')]"
+          }
+        }
+      }
   ],
 
     "outputs": {
