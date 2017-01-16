@@ -99,7 +99,7 @@
         }
       }
     },
-    "osProfilepassword": {
+    "osProfilePassword": {
       "computerName": "[parameters('bigipNamePrefix')]",
       "adminUsername": "[parameters('adminUsername')]",
       "adminPassword": "[parameters('adminPassword')]"
@@ -121,9 +121,9 @@
         "name": "bigipcopy"
       },
       "plan": {
-        "name": "f5-bigip-virtual-edition-1g-best-hourly",
+        "name": "f5-bigip-virtual-edition-best-byol",
         "publisher": "f5-networks",
-        "product": "f5-big-ip-hourly"
+        "product": "f5-big-ip"
       },
       "properties": {
         "availabilitySet": {
