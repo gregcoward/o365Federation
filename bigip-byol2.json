@@ -1,0 +1,171 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "apiVersionCompute": {
+      "type": "string",
+      "metadata": {
+        "description": "The compute api version"
+      }
+    },
+    "numberOfInstances": {
+      "type": "int",
+      "metadata": {
+        "description": "The number of F5 BIG-IPs that will be deployed as federation servers."
+      }
+    },
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "The Azure location hosting the resource"
+      }
+    },
+    "bigipNamePrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The bigip name prefix"
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "The admin account username"
+      }
+    },
+    "adminPassword": {
+      "type": "string",
+      "metadata": {
+        "description": "The admin account passowrd"
+      }
+    },
+    "authenticationType": {
+      "type": "string",
+      "metadata": {
+        "description": "Authentication method utilizeda"
+      }
+    },
+    "sshPublicKey": {
+      "type": "string",
+      "metadata": {
+        "description": "The ssh public key"
+      }
+    },
+    "instanceType": {
+      "type": "string",
+      "metadata": {
+        "description": "The bigip instance size"
+      }
+    },
+    "availabilitySetName": {
+      "type": "string",
+      "metadata": {
+        "description": "The bigip availability set"
+      }
+    },
+    "asId": {
+      "type": "string",
+      "metadata": {
+        "description": "The availability set id"
+      }
+    },
+    "nicNamePrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The network interface id"
+      }
+    },
+    "newStorageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "The storage account hosting bigip"
+      }
+    }
+  },
+  "variables": {
+    "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
+    "osProfileChosen": "[concat('osProfile', parameters('authenticationType'))]",
+    "osProfilesshPublicKey": {
+      "computerName": "[parameters('bigipNamePrefix')]",
+      "adminUsername": "[parameters('adminUsername')]",
+      "linuxConfiguration": {
+        "disablePasswordAuthentication": "true",
+        "ssh": {
+          "publicKeys": [
+            {
+              "keyData": "[parameters('sshPublicKey')]",
+              "path": "[variables('sshKeyPath')]"
+            }
+          ]
+        }
+      }
+    },
+    "osProfilepassword": {
+      "computerName": "[parameters('bigipNamePrefix')]",
+      "adminUsername": "[parameters('adminUsername')]",
+      "adminPassword": "[parameters('adminPassword')]"
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "[parameters('apiVersionCompute')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[concat(parameters('bigipNamePrefix'),copyindex(1))]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "displayName": "[concat(parameters('bigipNamePrefix'),copyindex(1))]"
+      },
+      "dependsOn": [
+      ],
+      "copy": {
+        "count": "[parameters('numberOfInstances')]",
+        "name": "bigipcopy"
+      },
+      "plan": {
+        "name": "f5-bigip-virtual-edition-1g-best-hourly",
+        "publisher": "f5-networks",
+        "product": "f5-big-ip-hourly"
+      },
+      "properties": {
+        "availabilitySet": {
+          "id": "[parameters('asId')]"
+        },
+        "hardwareProfile": {
+          "vmSize": "[parameters('instanceType')]"
+        },
+        "osProfile": "[variables(variables('osProfileChosen'))]",
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "f5-networks",
+            "offer": "f5-big-ip",
+            "sku": "f5-bigip-virtual-edition-best-byol",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "[concat('osdisk',parameters('bigipNamePrefix'),copyindex(1))]",
+            "vhd": {
+              "uri": "[concat('http://',parameters('newStorageAccountName'),'.blob.core.windows.net/',parameters('newStorageAccountName'),'/osDisk',copyindex(1),'.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('nicNamePrefix'),copyindex(1)))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true,
+            "storageUri": "[concat('http://',parameters('newstorageAccountName'),'.blob.core.windows.net')]"
+          }
+        }
+      }
+    }
+  ],
+
+    "outputs": {
+    }
+  }
