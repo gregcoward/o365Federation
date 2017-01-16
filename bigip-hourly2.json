@@ -99,7 +99,7 @@
         }
       }
     },
-    "osProfilepasswword": {
+    "osProfilepassword": {
       "computerName": "[parameters('bigipNamePrefix')]",
       "adminUsername": "[parameters('adminUsername')]",
       "adminPassword": "[parameters('adminPassword')]"
