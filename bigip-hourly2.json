@@ -209,7 +209,6 @@
         ]
       }
     },
-
     {
       "apiVersion": "[parameters('apiVersionCompute')]",
       "type": "Microsoft.Compute/virtualMachines",
@@ -274,7 +273,7 @@
       "apiVersion": "[parameters('apiVersionCompute')]",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "bigipDeployTemplate"
+          "[resourceId('Microsoft.Network/virtualmachines', concat(parameters('bigipNamePrefix'),'1'))]"
       ],
       "properties": {
         "publisher": "Microsoft.Azure.Extensions",
@@ -297,7 +296,7 @@
       "apiVersion": "[parameters('apiVersionCompute')]",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "bigipDeployTemplate"
+          "[resourceId('Microsoft.Network/virtualmachines', concat(parameters('bigipNamePrefix'),'2'))]"
       ],
       "properties": {
         "publisher": "Microsoft.Azure.Extensions",
