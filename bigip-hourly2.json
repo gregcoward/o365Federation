@@ -297,7 +297,7 @@
       "location": "[parameters('location')]",
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('bigipNamePrefix'),'2'))]",
-        "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('bigipNamePrefix'),'1','/start'))]"
+        "[concat('Microsoft.Compute/virtualMachines/extensions/', concat(parameters('bigipNamePrefix'),'1','/start'))]"
       ],
       "properties": {
         "publisher": "Microsoft.Azure.Extensions",
