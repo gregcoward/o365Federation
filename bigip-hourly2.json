@@ -8,6 +8,12 @@
         "description": "The compute api version"
       }
     },
+    "apiVersionNetwork": {
+      "type": "string",
+      "metadata": {
+        "description": "The network api version"
+      }
+    },
     "numberOfInstances": {
       "type": "int",
       "metadata": {
@@ -18,6 +24,24 @@
       "type": "string",
       "metadata": {
         "description": "The Azure location hosting the resource"
+      }
+    },
+    "loadBalancerName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the load balancer resource"
+      }
+    },
+    "lbId": {
+      "type": "string",
+      "metadata": {
+        "description": "The load balancer resource Id"
+      }
+    },
+    "subnetId": {
+      "type": "string",
+      "metadata": {
+        "description": "The subnet Id"
       }
     },
     "bigipNamePrefix": {
@@ -74,7 +98,7 @@
         "description": "The network interface id"
       }
     },
-    "newStorageAccountName":{
+    "newStorageAccountName": {
       "type": "string",
       "metadata": {
         "description": "vhd storage file"
@@ -144,6 +168,49 @@
   },
   "resources": [
     {
+      "apiVersion": "[parameters('apiVersionNetwork')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(parameters('nicNamePrefix'),copyindex(1))]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "displayName": "NetworkInterface"
+      },
+      "dependsOn": [
+      ],
+      "copy": {
+        "count": "[parameters('numberOfInstances')]",
+        "name": "niccopy"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[parameters('subnetId')]"
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[concat(parameters('lbId'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
+                }
+              ],
+
+              "loadBalancerInboundNatRules": [
+                {
+                  "id": "[concat(parameters('lbId'), '/inboundNatRules/', 'sshmgt',copyIndex(1))]"
+                },
+                {
+                  "id": "[concat(parameters('lbId'), '/inboundNatRules/', 'guimgt',copyIndex(1))]"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+
+    {
       "apiVersion": "[parameters('apiVersionCompute')]",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[concat(parameters('bigipNamePrefix'),copyindex(1))]",
@@ -211,7 +278,7 @@
       ],
       "properties": {
         "publisher": "Microsoft.Azure.Extensions",
-        "type": "CustomScript", 
+        "type": "CustomScript",
         "typeHandlerVersion": "2.0",
         "settings": {
           "fileUris": [
