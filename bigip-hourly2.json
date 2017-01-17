@@ -218,6 +218,7 @@
         "displayName": "[concat(parameters('bigipNamePrefix'),copyindex(1))]"
       },
       "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/',concat(parameters('nicNamePrefix'),'2'))]"
       ],
       "copy": {
         "count": "[parameters('numberOfInstances')]",
@@ -273,7 +274,7 @@
       "apiVersion": "[parameters('apiVersionCompute')]",
       "location": "[parameters('location')]",
       "dependsOn": [
-          "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('bigipNamePrefix'),'1'))]"
+        "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('bigipNamePrefix'),'1'))]"
       ],
       "properties": {
         "publisher": "Microsoft.Azure.Extensions",
