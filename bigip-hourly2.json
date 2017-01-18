@@ -298,8 +298,7 @@
       "apiVersion": "[parameters('apiVersionCompute')]",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('bigipNamePrefix'),'2'))]",
-        "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('bigipNamePrefix'),'1'),'/extensions/start')]"
+        "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('bigipNamePrefix'),'2'))]"
       ],
       "properties": {
         "publisher": "Microsoft.Azure.Extensions",
