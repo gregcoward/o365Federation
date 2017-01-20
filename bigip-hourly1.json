@@ -21,13 +21,13 @@
       }
     },
     "licenseToken1": {
-      "type": "int",
+      "type": "string",
       "metadata": {
         "description": "The first license token for BYOL"
       }
     },
     "licenseToken2": {
-      "type": "int",
+      "type": "string",
       "metadata": {
         "description": "The second license token for BYOL"
       }
