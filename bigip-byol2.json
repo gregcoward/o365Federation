@@ -238,9 +238,9 @@
         "name": "bigipcopy"
       },
       "plan": {
-        "name": "f5-bigip-virtual-edition-1g-best-hourly",
+        "name": "f5-bigip-virtual-edition-best-byol",
         "publisher": "f5-networks",
-        "product": "f5-big-ip-hourly"
+        "product": "f5-big-ip"
       },
       "properties": {
         "availabilitySet": {
@@ -253,8 +253,8 @@
         "storageProfile": {
           "imageReference": {
             "publisher": "f5-networks",
-            "offer": "f5-big-ip-hourly",
-            "sku": "f5-bigip-virtual-edition-1g-best-hourly",
+            "offer": "f5-big-ip",
+            "sku": "f5-bigip-virtual-edition-best-byol",
             "version": "latest"
           },
           "osDisk": {
@@ -300,7 +300,7 @@
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --tag ', parameters('f5CloudLibsTag'), ' --onboard \" --output /var/log/onboard.log --log-level debug --host ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(parameters('bigipNamePrefix'),'1', '.', parameters('domainFqdn')), ' --update-user user:admin,password:', parameters('adminPassword'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:nominal --module afm:none --module apm:nominal --update-sigs --signal ONBOARD_DONE \" --cluster \" --wait-for ONBOARD_DONE --output /var/log/clusterGroup.log --log-level debug --host ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --create-group --device-group Sync --sync-type sync-failover --device ', concat(parameters('bigipNamePrefix'),'1', '.', parameters('domainFqdn')), ' --auto-sync --save-on-auto-sync --asm-sync --signal SYNC_GROUP_DONE \" --script \" --wait-for SYNC_GROUP_DONE --output /var/log/runScript.log --log-level debug --url ',parameters('scriptLoc'),' --cl-args ', variables('singleQuote'),'-i ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, parameters('commandArgs'), variables('singleQuote'), ' --signal SCRIPT_DONE \" --cluster \" --wait-for SCRIPT_DONE --output /var/log/clusterSync.log --log-level debug --host ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --config-sync-ip ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, ' --signal CLUSTER_DONE \"')]"
+          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --tag ', parameters('f5CloudLibsTag'), ' --onboard \" --output /var/log/onboard.log --log-level debug --host ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(parameters('bigipNamePrefix'),'1', '.', parameters('domainFqdn')), ' --update-user user:admin,password:', parameters('adminPassword'), ' --license ', parameters('licenseToken1'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:nominal --module afm:none --module apm:nominal --update-sigs --signal ONBOARD_DONE \" --cluster \" --wait-for ONBOARD_DONE --output /var/log/clusterGroup.log --log-level debug --host ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --create-group --device-group Sync --sync-type sync-failover --device ', concat(parameters('bigipNamePrefix'),'1', '.', parameters('domainFqdn')), ' --auto-sync --save-on-auto-sync --asm-sync --signal SYNC_GROUP_DONE \" --script \" --wait-for SYNC_GROUP_DONE --output /var/log/runScript.log --log-level debug --url ',parameters('scriptLoc'),' --cl-args ', variables('singleQuote'),'-i ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, parameters('commandArgs'), variables('singleQuote'), ' --signal SCRIPT_DONE \" --cluster \" --wait-for SCRIPT_DONE --output /var/log/clusterSync.log --log-level debug --host ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --config-sync-ip ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, ' --signal CLUSTER_DONE \"')]"
         }
       }
     },
@@ -323,7 +323,7 @@
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --tag ', parameters('f5CloudLibsTag'), ' --onboard \" --output /var/log/onboard.log --log-level debug --host ', reference(concat(parameters('nicNamePrefix'),'2')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(parameters('bigipNamePrefix'),'2', '.', parameters('domainFqdn')), ' --update-user user:admin,password:', parameters('adminPassword'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:nominal --module afm:none --module apm:nominal --signal ONBOARD_DONE \" --cluster \" --wait-for ONBOARD_DONE --output /var/log/cluster.log --log-level debug --host ', reference(concat(parameters('nicNamePrefix'),'2')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --config-sync-ip ', reference(concat(parameters('nicNamePrefix'),'2')).ipConfigurations[0].properties.privateIpAddress, ' --join-group --device-group Sync --sync --remote-host ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, ' --remote-user admin --remote-password ', parameters('adminPassword'), ' --signal CLUSTER_DONE \" --script \" --wait-for CLUSTER_DONE --output /var/log/runScript.log --log-level debug --url ',parameters('scriptLoc'),' --cl-args ', variables('singleQuote'),'-i ',reference(concat(parameters('nicNamePrefix'),'2')).ipConfigurations[0].properties.privateIpAddress, parameters('commandArgs'), variables('singleQuote'), ' --signal SCRIPT_DONE \"')]"
+          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --tag ', parameters('f5CloudLibsTag'), ' --onboard \" --output /var/log/onboard.log --log-level debug --host ', reference(concat(parameters('nicNamePrefix'),'2')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(parameters('bigipNamePrefix'),'2', '.', parameters('domainFqdn')), ' --update-user user:admin,password:', parameters('adminPassword'), ' --license ', parameters('licenseToken2'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:nominal --module afm:none --module apm:nominal --signal ONBOARD_DONE \" --cluster \" --wait-for ONBOARD_DONE --output /var/log/cluster.log --log-level debug --host ', reference(concat(parameters('nicNamePrefix'),'2')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --config-sync-ip ', reference(concat(parameters('nicNamePrefix'),'2')).ipConfigurations[0].properties.privateIpAddress, ' --join-group --device-group Sync --sync --remote-host ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, ' --remote-user admin --remote-password ', parameters('adminPassword'), ' --signal CLUSTER_DONE \" --script \" --wait-for CLUSTER_DONE --output /var/log/runScript.log --log-level debug --url ',parameters('scriptLoc'),' --cl-args ', variables('singleQuote'),'-i ',reference(concat(parameters('nicNamePrefix'),'2')).ipConfigurations[0].properties.privateIpAddress, parameters('commandArgs'), variables('singleQuote'), ' --signal SCRIPT_DONE \"')]"
         }
       }
     }

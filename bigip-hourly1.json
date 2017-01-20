@@ -20,6 +20,18 @@
         "description": "The number of F5 BIG-IPs that will be deployed as federation servers."
       }
     },
+    "licenseToken1": {
+      "type": "int",
+      "metadata": {
+        "description": "The first license token for BYOL"
+      }
+    },
+    "licenseToken2": {
+      "type": "int",
+      "metadata": {
+        "description": "The second license token for BYOL"
+      }
+    },
     "location": {
       "type": "string",
       "metadata": {
