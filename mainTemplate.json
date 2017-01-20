@@ -20,7 +20,6 @@
     "numberOfInstances": {
       "type": "int",
       "defaultValue": 2,
-      "allowedValues": [ 2 ],
       "metadata": {
         "description": "The number of F5 BIG-IPs that will be deployed as federation servers."
       }
@@ -171,6 +170,7 @@
     "newStorageAccountName": "[concat(tolower(variables('dnsNameForPublicIP')),'stor')]",
     "bigipNamePrefix": "bigip",
     "nicNamePrefix": "bigip-nic",
+    "nicStop": "[concat(variables('nicNamePrefix'),parameters('numberOfInstances'))]",
     "publicIPName": "[concat(variables('bigipNamePrefix'),'-ip')]",
     "scriptName": "o365FedDeploy.sh",
     "scriptLoc": "[concat(parameters('baseUrl'),'/',variables('scriptName'))]",
@@ -182,8 +182,7 @@
     "lbId": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]",
     "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
     "publicIpId": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPName'))]",
-    "singleQuote": "'",
-    "f5CloudLibsTag": "F5Networks-f5-cloud-libs-v1.0.0-0-g9f85e95.tar.gz",
+    "f5CloudLibsTag": "F5Networks-f5-cloud-libs-v1.2.0-0-g9bcad61.tar.gz",
     "f5CloudLibsTagUrl": "[concat(parameters('baseUrl'),'/',variables('f5CloudLibsTag'))]",
     "commandArgs": "[concat(' -p ',variables('appPort'),' -e ', variables('entityId'),' -d ', parameters('authFqdn'),' -a ', parameters('authIp'),' -f ', parameters('domainfqdn'),' -c ', parameters('sslCert'),' -w ', parameters('sslPswd'),' -x ', parameters('adminPassword'),' -u ', variables('iappUrl'))]"
   },
@@ -322,35 +321,10 @@
     {
       "apiVersion": "[variables('apiVersionNetwork')]",
       "tags": {
-        "displayName": "InboundNATRulesGUI"
-      },
-      "type": "Microsoft.Network/loadBalancers/inboundNatRules",
-      "name": "[concat(variables('loadBalancerName'),'/guimgt', copyIndex())]",
-      "location": "[parameters('location')]",
-      "copy": {
-        "name": "lbNatLoop",
-        "count": "[parameters('numberOfInstances')]"
-      },
-      "dependsOn": [
-        "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]"
-      ],
-      "properties": {
-        "frontendIPConfiguration": {
-          "id": "[concat(variables('frontEndIPConfigID'), '1')]"
-        },
-        "protocol": "tcp",
-        "frontendPort": "[copyIndex(8443)]",
-        "backendPort": 443,
-        "enableFloatingIP": false
-      }
-    },
-    {
-      "apiVersion": "[variables('apiVersionNetwork')]",
-      "tags": {
         "displayName": "InboundNATRulesSSH"
       },
       "type": "Microsoft.Network/loadBalancers/inboundNatRules",
-      "name": "[concat(variables('loadBalancerName'),'/sshmgt', copyIndex())]",
+      "name": "[concat(variables('loadBalancerName'),'/sshmgt', copyIndex(1))]",
       "location": "[parameters('location')]",
       "copy": {
         "name": "lbNatLoop",
@@ -371,48 +345,27 @@
     },
     {
       "apiVersion": "[variables('apiVersionNetwork')]",
-      "type": "Microsoft.Network/networkInterfaces",
-      "name": "[concat(variables('nicNamePrefix'),copyindex())]",
-      "location": "[parameters('location')]",
       "tags": {
-        "displayName": "NetworkInterface"
+        "displayName": "InboundNATRulesGUI"
+      },
+      "type": "Microsoft.Network/loadBalancers/inboundNatRules",
+      "name": "[concat(variables('loadBalancerName'),'/guimgt', copyIndex(1))]",
+      "location": "[parameters('location')]",
+      "copy": {
+        "name": "lbNatLoop",
+        "count": "[parameters('numberOfInstances')]"
       },
       "dependsOn": [
-        "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]",
-        "[concat(variables('lbId'),'/inboundNatRules/guimgt',copyindex())]",
-        "[concat(variables('lbId'),'/inboundNatRules/sshmgt',copyindex())]",
-        "virtualNetworkTemplate"
+        "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]"
       ],
-      "copy": {
-        "count": "[parameters('numberOfInstances')]",
-        "name": "niccopy"
-      },
       "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig1",
-            "properties": {
-              "privateIPAllocationMethod": "Dynamic",
-              "subnet": {
-                "id": "[concat(reference('virtualNetworkTemplate').outputs.vnetID.value,'/subnets/',parameters('subnetName'))]"
-              },
-              "loadBalancerBackendAddressPools": [
-                {
-                  "id": "[concat(variables('lbId'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
-                }
-              ],
-
-              "loadBalancerInboundNatRules": [
-                {
-                  "id": "[concat(variables('lbId'), '/inboundNatRules/', 'sshmgt',copyIndex())]"
-                },
-                {
-                  "id": "[concat(variables('lbId'), '/inboundNatRules/', 'guimgt',copyIndex())]"
-                }
-              ]
-            }
-          }
-        ]
+        "frontendIPConfiguration": {
+          "id": "[concat(variables('frontEndIPConfigID'), '1')]"
+        },
+        "protocol": "tcp",
+        "frontendPort": "[copyIndex(8443)]",
+        "backendPort": 443,
+        "enableFloatingIP": false
       }
     },
     {
@@ -423,8 +376,6 @@
         "[resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName'))]",
         "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', variables('newStorageAccountName'))]",
-        "[concat(variables('lbId'),'/inboundNatRules/guimgt')]",
-        "[concat(variables('lbId'),'/inboundNatRules/sshmgt')]",
         "virtualNetworkTemplate"
       ],
       "properties": {
@@ -434,81 +385,31 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "apiVersionCompute": {
-            "value": "[variables('apiVersionCompute')]"
-          },
-          "apiVersionNetwork": {
-            "value": "[variables('apiVersionNetwork')]"
-          },
-          "location": {
-            "value": "[parameters('location')]"
-          },
-          "bigipNamePrefix": {
-            "value": "[variables('bigipNamePrefix')]"
-          },
-          "adminUsername": {
-            "value": "[parameters('adminUsername')]"
-          },
-          "adminPassword": {
-            "value": "[parameters('adminPassword')]"
-          },
-          "authenticationType": {
-            "value": "[parameters('authenticationType')]"
-          },
-          "sshPublicKey": {
-            "value": "[parameters('sshPublicKey')]"
-          },
-          "instanceType": {
-            "value": "[parameters('instanceType')]"
-          },
-          "availabilitySetName": {
-            "value": "[variables('availabilitySetName')]"
-          },
-          "subnetRef": {
-            "value": "[concat(reference('virtualNetworkTemplate').outputs.vnetID.value,'/subnets/',parameters('subnetName'))]"
-          },
-          "lbId": {
-            "value": "[variables('lbId')]"
-          },
-          "asId": {
-            "value": "[variables('asId')]"
-          },
-          "nicNamePrefix": {
-            "value": "[variables('nicNamePrefix')]"
-          },
-          "newStorageAccountName": {
-            "value": "[variables('newStorageAccountName')]"
-          },
-          "singleQuote": {
-            "value": "[variables('singleQuote')]"
-          },
-          "f5CloudLibsTag": {
-            "value": "[variables('f5CloudLibsTag')]"
-          },
-          "f5CloudLibsTagUrl": {
-            "value": "[variables('f5CloudLibsTagUrl')]"
-          },
-          "runScripts": {
-            "value": "[variables('runScripts')]"
-          },
-          "runScriptsUrl": {
-            "value": "[variables('runScriptsUrl')]"
-          },
-          "scriptLoc": {
-            "value": "[variables('scriptLoc')]"
-          },
-          "commandArgs": {
-            "value": "[variables('commandArgs')]"
-          },
-          "domainFqdn": {
-            "value": "[parameters('domainFqdn')]"
-          },
-          "licenseToken1": {
-            "value": "[parameters('licenseToken1')]"
-          },
-          "licenseToken2":{
-            "value": "[parameters('licenseToken2')]"
-          }
+          "apiVersionCompute": { "value": "[variables('apiVersionCompute')]" },
+          "apiVersionNetwork": { "value": "[variables('apiVersionNetwork')]" },
+          "location": { "value": "[parameters('location')]" },
+          "loadBalancerName": { "value": "[variables('loadBalancerName')]" },
+          "numberOfInstances": { "value": "[parameters('numberofInstances')]" },
+          "licenseToken1": { "value": "[parameters('licenseToken1')]" },
+          "licenseToken2": { "value": "[parameters('licenseToken2')]" },
+          "bigipNamePrefix": { "value": "[variables('bigipNamePrefix')]" },
+          "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "authenticationType": { "value": "[parameters('authenticationType')]" },
+          "sshPublicKey": { "value": "[parameters('sshPublicKey')]" },
+          "instanceType": { "value": "[parameters('instanceType')]" },
+          "availabilitySetName": { "value": "[variables('availabilitySetName')]" },
+          "asId": { "value": "[variables('asId')]" },
+          "nicNamePrefix": { "value": "[variables('nicNamePrefix')]" },
+          "newStorageAccountName": { "value": "[variables('newStorageAccountName')]" },
+          "runScriptsUrl": { "value": "[variables('runScriptsUrl')]" },
+          "f5CloudLibsTagUrl": { "value": "[variables('f5CloudLibsTagUrl')]" },
+          "f5CloudLibsTag": { "value": "[variables('f5CloudLibsTag')]" },
+          "domainFqdn": { "value": "[parameters('domainFqdn')]" },
+          "commandArgs": { "value": "[variables('commandArgs')]" },
+          "scriptLoc": { "value": "[variables('scriptLoc')]" },
+          "lbId": { "value": "[variables('lbId')]" },
+          "subnetId": { "value": "[concat(reference('virtualNetworkTemplate').outputs.vnetID.value,'/subnets/',parameters('subnetName'))]" }
         }
       }
     }
