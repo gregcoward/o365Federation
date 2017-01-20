@@ -69,10 +69,8 @@
             waiting--;
 
             if (!waiting) {
-                // Make sure the last log message is flushed before exitting.
-                logger.info("All children have exitted. Exitting.", function() {
-                    process.exit();
-                });
+                logger.info("All children have exitted. Exitting.");
+                process.exit();
             }
         });
     };
@@ -100,8 +98,6 @@
                 var scriptArgs;
                 var shellOutput;
                 var f5CloudLibsTag;
-                var fstats;
-                var doInstall;
                 var i;
                 var j;
 
@@ -159,44 +155,30 @@
                     f5CloudLibsTag = argv[argIndex + 1];
                 }
 
-                try {
-                    fstats = fs.statSync("/config/f5-cloud-libs");
-                }
-                catch (err) {
-                    if (err.code === 'ENOENT') {
-                        doInstall = true;
+                console.log("Creating f5-cloud-libs directory.");
+                fs.mkdirSync("/config/f5-cloud-libs");
+
+                console.log("Moving libraries to /config.");
+                shellOutput = childProcess.execSync("mv " + f5CloudLibsTag + " /config/f5-cloud-libs.tar.gz");
+                console.log(shellOutput.toString());
+
+                console.log("Expanding libraries.");
+                shellOutput = childProcess.execSync(
+                    "tar -xzf f5-cloud-libs.tar.gz --strip-components 1 --directory f5-cloud-libs",
+                    {
+                        cwd: "/config"
                     }
-                }
+                );
+                console.log(shellOutput.toString());
 
-                if (doInstall) {
-                    console.log("Creating f5-cloud-libs directory.");
-                    fs.mkdirSync("/config/f5-cloud-libs");
-
-                    console.log("Moving libraries to /config.");
-                    shellOutput = childProcess.execSync("mv " + f5CloudLibsTag + " /config/f5-cloud-libs.tar.gz");
-                    console.log(shellOutput.toString());
-
-                    console.log("Expanding libraries.");
-                    shellOutput = childProcess.execSync(
-                        "tar -xzf f5-cloud-libs.tar.gz --strip-components 1 --directory f5-cloud-libs",
-                        {
-                            cwd: "/config"
-                        }
-                    );
-                    console.log(shellOutput.toString());
-
-                    console.log("Downloading dependencies.");
-                    shellOutput = childProcess.execSync(
-                        "npm install --production",
-                        {
-                            cwd: "/config/f5-cloud-libs"
-                        }
-                    );
-                    console.log(shellOutput.toString());
-                }
-                else {
-                    console.log("f5-cloud-libs already installed.");
-                }
+                console.log("Downloading dependencies.");
+                shellOutput = childProcess.execSync(
+                    "npm install --production",
+                    {
+                        cwd: "/config/f5-cloud-libs"
+                    }
+                );
+                console.log(shellOutput.toString());
 
                 ipc = require('/config/f5-cloud-libs/lib/ipc');
                 Logger = require('/config/f5-cloud-libs/lib/logger');
@@ -216,34 +198,31 @@
                 logger.info("Running scripts.");
 
                 argIndex = argv.indexOf('--onboard');
-                while (argIndex !== -1) {
-                    logger.debug("onboard arg index", argIndex);
+                logger.debug("onboard arg index", argIndex);
+                if (argIndex !== -1) {
                     scriptArgs = argv[argIndex + 1];
                     spawnScript("onboard.js", undefined, scriptArgs);
-                    argIndex = argv.indexOf('--onboard', argIndex + 1);
                 }
 
                 argIndex = argv.indexOf('--cluster');
-                while (argIndex !== -1) {
-                    logger.debug("cluster arg index", argIndex);
+                logger.debug("cluster arg index", argIndex);
+                if (argIndex !== -1) {
                     scriptArgs = argv[argIndex + 1];
                     spawnScript("cluster.js", undefined, scriptArgs);
-                    argIndex = argv.indexOf('--cluster', argIndex + 1);
                 }
 
                 argIndex = argv.indexOf('--network');
-                while (argIndex !== -1) {
-                    logger.debug("network arg index", argIndex);
+                logger.debug("network arg index", argIndex);
+                if (argIndex !== -1) {
                     scriptArgs = argv[argIndex + 1];
                     spawnScript("network.js", undefined, scriptArgs);
-                    argIndex = argv.indexOf('--network', argIndex + 1);
                 }
 
+                // Process multiple --script args
                 argIndex = argv.indexOf('--script');
+                logger.debug("script arg index", argIndex);
                 /* jshint loopfunc: true */
                 while (argIndex !== -1) {
-                    logger.debug("script arg index", argIndex);
-
                     args = [];
                     scriptArgs = argv[argIndex + 1];
                     clArgIndex = scriptArgs.indexOf('--cl-args');
@@ -277,16 +256,15 @@
                     spawnScript("runScript.js", args);
 
                     argIndex = argv.indexOf('--script', argIndex + 1);
+                    logger.debug("next script arg index", argIndex);
                 }
                 /* jshint loopfunc: false */
 
                 // If we reboot, exit - otherwise Azure doesn't know the extensions script is done
                 ipc.once('REBOOT')
                     .then(function() {
-                        // Make sure the last log message is flushed before exitting.
-                        logger.info("REBOOT signalled. Exitting.", function() {
-                            process.exit();
-                        });
+                        logger.info("REBOOT signalled. Exitting.");
+                        process.exit();
                     });
 
             }
