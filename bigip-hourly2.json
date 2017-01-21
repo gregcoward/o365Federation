@@ -295,8 +295,8 @@
         "typeHandlerVersion": "2.0",
         "settings": {
           "fileUris": [
-            "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', parameters('f5CloudLibsTag'), '/scripts/azure/runScripts.js')]",
-            "[concat('https://api.github.com/repos/F5Networks/f5-cloud-libs/tarball/', parameters('f5CloudLibsTag'))]"
+            "[parameters('runScriptsUrl')]",
+            "[parameters('f5CloudLibsTagUrl')]"
           ]
         },
         "protectedSettings": {
@@ -318,8 +318,8 @@
         "typeHandlerVersion": "2.0",
         "settings": {
           "fileUris": [
-            "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', parameters('f5CloudLibsTag'), '/scripts/azure/runScripts.js')]",
-            "[concat('https://api.github.com/repos/F5Networks/f5-cloud-libs/tarball/', parameters('f5CloudLibsTag'))]"
+            "[parameters('runScriptsUrl')]",
+            "[parameters('f5CloudLibsTagUrl')]"
           ]
         },
         "protectedSettings": {
