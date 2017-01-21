@@ -14,10 +14,46 @@
         "description": "The network api version"
       }
     },
+    "numberOfInstances": {
+      "type": "int",
+      "metadata": {
+        "description": "The number of F5 BIG-IPs that will be deployed as federation servers."
+      }
+    },
+    "licenseToken1": {
+      "type": "string",
+      "metadata": {
+        "description": "The first license token for BYOL"
+      }
+    },
+    "licenseToken2": {
+      "type": "string",
+      "metadata": {
+        "description": "The second license token for BYOL"
+      }
+    },
     "location": {
       "type": "string",
       "metadata": {
         "description": "The Azure location hosting the resource"
+      }
+    },
+    "loadBalancerName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the load balancer resource"
+      }
+    },
+    "lbId": {
+      "type": "string",
+      "metadata": {
+        "description": "The load balancer resource Id"
+      }
+    },
+    "subnetId": {
+      "type": "string",
+      "metadata": {
+        "description": "The subnet Id"
       }
     },
     "bigipNamePrefix": {
@@ -62,25 +98,13 @@
         "description": "The bigip availability set"
       }
     },
-    "subnetRef": {
-      "type": "string",
-      "metadata": {
-        "description": "The subnet reference where bigip is hosted"
-      }
-    },
-    "lbId": {
-      "type": "string",
-      "metadata": {
-        "description": "The load balancer id"
-      }
-    },
     "asId": {
       "type": "string",
       "metadata": {
         "description": "The availability set id"
       }
     },
-    "niId": {
+    "nicNamePrefix": {
       "type": "string",
       "metadata": {
         "description": "The network interface id"
@@ -89,7 +113,43 @@
     "newStorageAccountName": {
       "type": "string",
       "metadata": {
-        "description": "The storage account hosting bigip"
+        "description": "vhd storage file"
+      }
+    },
+    "runScriptsUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "URL for nested templates"
+      }
+    },
+    "f5CloudLibsTagUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "Cloudlibs Url Tage"
+      }
+    },
+    "f5CloudLibsTag": {
+      "type": "string",
+      "metadata": {
+        "description": "Tag for F5 CloudLibs "
+      }
+    },
+    "domainFqdn": {
+      "type": "string",
+      "metadata": {
+        "description": "Federation Domaain Name"
+      }
+    },
+    "commandArgs": {
+      "type": "string",
+      "metadata": {
+        "description": "IApp Deployment script command argurments string"
+      }
+    },
+    "scriptLoc": {
+      "type": "string",
+      "metadata": {
+        "description": "URL location for run script"
       }
     }
   },
@@ -115,19 +175,68 @@
       "computerName": "[parameters('bigipNamePrefix')]",
       "adminUsername": "[parameters('adminUsername')]",
       "adminPassword": "[parameters('adminPassword')]"
-    }
+    },
+    "singleQuote": "'"
   },
   "resources": [
     {
-      "apiVersion": "[parameters('apiVersionCompute')]",
-      "type": "Microsoft.Compute/virtualMachines",
-      "name": "[parameters('bigipNamePrefix')]",
+      "apiVersion": "[parameters('apiVersionNetwork')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(parameters('nicNamePrefix'),copyindex(1))]",
       "location": "[parameters('location')]",
       "tags": {
-        "displayName": "BIG-IP"
+        "displayName": "NetworkInterface"
       },
       "dependsOn": [
       ],
+      "copy": {
+        "count": "[parameters('numberOfInstances')]",
+        "name": "niccopy"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[parameters('subnetId')]"
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[concat(parameters('lbId'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
+                }
+              ],
+
+              "loadBalancerInboundNatRules": [
+                {
+                  "id": "[concat(parameters('lbId'), '/inboundNatRules/', 'sshmgt',copyIndex(1))]"
+                },
+                {
+                  "id": "[concat(parameters('lbId'), '/inboundNatRules/', 'guimgt',copyIndex(1))]"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "[parameters('apiVersionCompute')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[concat(parameters('bigipNamePrefix'),copyindex(1))]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "displayName": "[concat(parameters('bigipNamePrefix'),copyindex(1))]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/',concat(parameters('nicNamePrefix'),'1'))]",
+        "[concat('Microsoft.Network/networkInterfaces/',concat(parameters('nicNamePrefix'),'2'))]"
+      ],
+      "copy": {
+        "count": "[parameters('numberOfInstances')]",
+        "name": "bigipcopy"
+      },
       "plan": {
         "name": "f5-bigip-virtual-edition-best-byol",
         "publisher": "f5-networks",
@@ -149,9 +258,9 @@
             "version": "latest"
           },
           "osDisk": {
-            "name": "[concat('osdisk',parameters('bigipNamePrefix'))]",
+            "name": "[concat('osdisk',parameters('bigipNamePrefix'),copyindex(1))]",
             "vhd": {
-              "uri": "[concat('http://',parameters('newStorageAccountName'),'.blob.core.windows.net/',parameters('newStorageAccountName'),'/osDisk.vhd')]"
+              "uri": "[concat('http://',parameters('newStorageAccountName'),'.blob.core.windows.net/',parameters('newStorageAccountName'),'/osDisk',copyindex(1),'.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -160,7 +269,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-            "id": "[parameters('niId')]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('nicNamePrefix'),copyindex(1)))]"
             }
           ]
         },
@@ -171,8 +280,59 @@
           }
         }
       }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(parameters('bigipNamePrefix'),'1','/start')]",
+      "apiVersion": "[parameters('apiVersionCompute')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('bigipNamePrefix'),'1'))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Azure.Extensions",
+        "type": "CustomScript",
+        "typeHandlerVersion": "2.0",
+        "settings": {
+          "fileUris": [
+            "[parameters('runScriptsUrl')]",
+            "[parameters('f5CloudLibsTagUrl')]"
+          ]
+        },
+        "protectedSettings": {
+          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --tag ', parameters('f5CloudLibsTag'), ' --onboard \" --output /var/log/onboard.log --log-level debug --host ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(parameters('bigipNamePrefix'),'1', '.', parameters('domainFqdn')), ' --update-user user:admin,password:', parameters('adminPassword'), ' --license ', parameters('licenseToken1'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:nominal --module afm:none --module apm:nominal --update-sigs --signal ONBOARD_DONE \" --cluster \" --wait-for ONBOARD_DONE --output /var/log/clusterGroup.log --log-level debug --host ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --create-group --device-group Sync --sync-type sync-failover --device ', concat(parameters('bigipNamePrefix'),'1', '.', parameters('domainFqdn')), ' --auto-sync --save-on-auto-sync --asm-sync --signal SYNC_GROUP_DONE \" --script \" --wait-for SYNC_GROUP_DONE --output /var/log/runScript.log --log-level debug --url ',parameters('scriptLoc'),' --cl-args ', variables('singleQuote'),'-i ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, parameters('commandArgs'), variables('singleQuote'), ' --signal SCRIPT_DONE \" --cluster \" --wait-for SCRIPT_DONE --output /var/log/clusterSync.log --log-level debug --host ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --config-sync-ip ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, ' --signal CLUSTER_DONE \"')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(parameters('bigipNamePrefix'),copyIndex(2),'/start')]",
+      "apiVersion": "[parameters('apiVersionCompute')]",
+      "location": "[parameters('location')]",
+      "copy": {
+        "count": "[parameters('numberOfInstances')]",
+        "name": "bigipcopy"
+      },	    
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('bigipNamePrefix'),copyIndex(2)))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Azure.Extensions",
+        "type": "CustomScript",
+        "typeHandlerVersion": "2.0",
+        "settings": {
+          "fileUris": [
+            "[parameters('runScriptsUrl')]",
+            "[parameters('f5CloudLibsTagUrl')]"
+          ]
+        },
+        "protectedSettings": {
+          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --tag ', parameters('f5CloudLibsTag'), ' --onboard \" --output /var/log/onboard.log --log-level debug --host ', reference(concat(parameters('nicNamePrefix'),copyIndex(2))).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(parameters('bigipNamePrefix'),'2', '.', parameters('domainFqdn')), ' --update-user user:admin,password:', parameters('adminPassword'), ' --license ', parameters('licenseToken2'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:nominal --module afm:none --module apm:nominal --signal ONBOARD_DONE \" --cluster \" --wait-for ONBOARD_DONE --output /var/log/cluster.log --log-level debug --host ', reference(concat(parameters('nicNamePrefix'),copyIndex(2))).ipConfigurations[0].properties.privateIpAddress, ' -u admin -p ', parameters('adminPassword'), ' --config-sync-ip ', reference(concat(parameters('nicNamePrefix'),copyIndex(2))).ipConfigurations[0].properties.privateIpAddress, ' --join-group --device-group Sync --sync --remote-host ', reference(concat(parameters('nicNamePrefix'),'1')).ipConfigurations[0].properties.privateIpAddress, ' --remote-user admin --remote-password ', parameters('adminPassword'), ' --signal CLUSTER_DONE \" --script \" --wait-for CLUSTER_DONE --output /var/log/runScript.log --log-level debug --url ',parameters('scriptLoc'),' --cl-args ', variables('singleQuote'),'-i ',reference(concat(parameters('nicNamePrefix'),copyIndex(2))).ipConfigurations[0].properties.privateIpAddress, parameters('commandArgs'), variables('singleQuote'), ' --signal SCRIPT_DONE \"')]"
+        }
+      }
     }
   ],
-	"outputs": {
-	}
-}
+
+    "outputs": {
+    }
+  }
