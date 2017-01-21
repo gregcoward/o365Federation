@@ -230,8 +230,7 @@
         "displayName": "[concat(parameters('bigipNamePrefix'),copyindex(1))]"
       },
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/',concat(parameters('nicNamePrefix'),'1'))]",
-        "[concat('Microsoft.Network/networkInterfaces/',concat(parameters('nicNamePrefix'),'2'))]"
+        "[concat('Microsoft.Network/networkInterfaces/',concat(parameters('nicNamePrefix'),'1'))]"
       ],
       "copy": {
         "count": "[parameters('numberOfInstances')]",
