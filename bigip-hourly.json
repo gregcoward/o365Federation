@@ -310,7 +310,7 @@
       "apiVersion": "[parameters('apiVersionCompute')]",
       "location": "[parameters('location')]",
       "copy": {
-        "count": "[sub(parameters('numberOfInstances'),1]",
+        "count": "[sub(parameters('numberOfInstances'),1)]",
         "name": "bigipcopy"
       },	    
       "dependsOn": [
