@@ -182,7 +182,7 @@
     "lbId": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]",
     "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
     "publicIpId": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPName'))]",
-    "f5CloudLibsTag": "develop",
+    "f5CloudLibsTag": "F5Networks-f5-cloud-libs-236d600.tar.gz",
     "f5CloudLibsTagUrl": "[concat(parameters('baseUrl'),'/',variables('f5CloudLibsTag'))]",
     "commandArgs": "[concat(' -p ',variables('appPort'),' -e ', variables('entityId'),' -d ', parameters('authFqdn'),' -a ', parameters('authIp'),' -f ', parameters('domainfqdn'),' -c ', parameters('sslCert'),' -w ', parameters('sslPswd'),' -x ', parameters('adminPassword'),' -u ', variables('iappUrl'))]"
   },
