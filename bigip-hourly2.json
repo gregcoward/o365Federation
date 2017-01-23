@@ -285,7 +285,6 @@
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(parameters('bigipNamePrefix'),'1','/start')]",
       "apiVersion": "[parameters('apiVersionCompute')]",
-      "autoupgradeMinorVersion": "true",
       "location": "[parameters('location')]",
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('bigipNamePrefix'),'1'))]"
@@ -309,7 +308,6 @@
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(parameters('bigipNamePrefix'),'2','/start')]",
       "apiVersion": "[parameters('apiVersionCompute')]",
-      "autoupgradeMinorVersion": "true",      
       "location": "[parameters('location')]",
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('bigipNamePrefix'),'2'))]"
