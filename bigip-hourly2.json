@@ -285,6 +285,7 @@
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(parameters('bigipNamePrefix'),'1','/start')]",
       "apiVersion": "[parameters('apiVersionCompute')]",
+      "autoUpgrade": "true",
       "location": "[parameters('location')]",
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('bigipNamePrefix'),'1'))]"
