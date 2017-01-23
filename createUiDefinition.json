@@ -151,7 +151,7 @@
           {
             "name": "licenseToken1",
             "type": "Microsoft.Common.TextBox",
-            "label": "BYOL Token - (Leave at default for hourly billing)",
+            "label": "BYOL Token - (Leave default for hourly billing)",
             "defaultValue": "XXXXX-XXXXX-XXXXX-XXXXX-XXXXXXX",
             "toolTip": "Enter the F5 BIG-IP License key if utilizing BYOL licensing model, (not required for hourly billing).",
             "constraints": {
@@ -163,7 +163,7 @@
           {
             "name": "licenseToken2",
             "type": "Microsoft.Common.TextBox",
-            "label": "BYOL Token - (Leave at default for hourly billing or single BIG-IP)",
+            "label": "BYOL Token - (Leave default for hourly billing/single BIG-IP)",
             "defaultValue": "XXXXX-XXXXX-XXXXX-XXXXX-XXXXXXX",
             "toolTip": "Enter the F5 BIG-IP License key if utilizing BYOL licensing model, (not required for hourly billing).",
             "constraints": {
