@@ -15,6 +15,27 @@
         "bladeTitle": "F5 BIG-IP Configuration Settings",
         "elements": [
           {
+            "name": "numberOfInstances",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Number of BIG-IPs",
+            "defaultValue": "2",
+            "toolTip": "Select the number of BIG-IPs to deploy, (1 or 2).",
+            "constraints": {
+              "allowedValues": [
+              {
+                "label": "1",
+                "value": "1"
+              },
+              {
+                "label": "2",
+                "value": "2"
+              }
+            ],
+              "visible": true,
+              "validationMessage": "Select the number of BIG-IPs to deploy, (1 or 2)."
+            }
+          },          
+          {
             "name": "adminUsername",
             "type": "Microsoft.Compute.UserNameTextBox",
             "label": "BIG-IP Administrator Username",
@@ -128,11 +149,23 @@
             }
           },
           {
-            "name": "licenseToken",
+            "name": "licenseToken1",
             "type": "Microsoft.Common.TextBox",
             "label": "BYOL Token",
             "defaultValue": "XXXXX-XXXXX-XXXXX-XXXXX-XXXXXXX",
-            "toolTip": "Enter the F5 BIG-IP License key if utilizing BYOL licensing model.",
+            "toolTip": "Enter the F5 BIG-IP License key if utilizing BYOL licensing model, (not required for hourly billing).",
+            "constraints": {
+              "regex": "^[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{7}$",
+              "validationMessage": "Provide the BIG-IP licence key in XXXXX-XXXXX-XXXXX-XXXXX-XXXXXXX format."
+
+            }
+          },
+          {
+            "name": "licenseToken2",
+            "type": "Microsoft.Common.TextBox",
+            "label": "BYOL Token",
+            "defaultValue": "XXXXX-XXXXX-XXXXX-XXXXX-XXXXXXX",
+            "toolTip": "Enter the F5 BIG-IP License key if utilizing BYOL licensing model, (not required for hourly billing).",
             "constraints": {
               "regex": "^[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{7}$",
               "validationMessage": "Provide the BIG-IP licence key in XXXXX-XXXXX-XXXXX-XXXXX-XXXXXXX format."
@@ -240,13 +273,15 @@
     ],
     "outputs": {
       "location": "[location()]",
+      "numberOfInstances": "[steps('bigipSettings').numberOfInstances]",
       "adminUsername": "[steps('bigipSettings').adminUsername]",
       "adminPassword": "[steps('bigipSettings').SSHCredentials.password]",
       "sshPublicKey": "[steps('bigipSettings').SSHCredentials.sshPublicKey]",
       "authenticationType": "[steps('bigipSettings').SSHCredentials.authenticationType]",
       "instanceType": "[steps('bigipSettings').instanceType]",
       "licenseModel": "[steps('bigipSettings').licenseModel]",
-      "licenseToken": "[steps('bigipSettings').licenseToken]",
+      "licenseToken1": "[steps('bigipSettings').licenseToken1]",
+      "licenseToken2": "[steps('bigipSettings').licenseToken1]",
       "authFqdn": "[steps('federationSettings').authFqdn]",
       "authIp": "[steps('federationSettings').authIp]",
       "domainFqdn": "[steps('federationSettings').domainFqdn]",

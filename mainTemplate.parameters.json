@@ -15,6 +15,13 @@
         "description": "The Azure location hosting the resource"
       }
     },
+    "numberOfInstances": {
+      "type": "int",
+      "defaultValue": 2,
+      "metadata": {
+        "description": "The number of F5 BIG-IPs that will be deployed as federation servers."
+      }
+    },
     "adminUsername": {
       "type": "string",
       "defaultValue": "azureuser",
@@ -53,7 +60,13 @@
         "description": "The licensing model, either hourly or byol."
       }
     },
-    "licenseToken": {
+    "licenseToken1": {
+      "type": "string",
+      "metadata": {
+        "description": "The License Token for the first BYOL F5 Web Application Firewall."
+      }
+    },
+    "licenseToken2": {
       "type": "string",
       "metadata": {
         "description": "The License Token for the first BYOL F5 Web Application Firewall."
