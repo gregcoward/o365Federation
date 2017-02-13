@@ -51,7 +51,14 @@
         "description": "The type of auth utilized - password or ssh public key"
       }
     },
-    "instanceType": {
+    "instanceTypeByol": {
+      "type": "string",
+      "defaultValue": "Standard_D3_v2",
+      "metadata": {
+        "description": "The size of the Virtual Hardware Instance."
+      }
+    },
+    "instanceTypePayg": {
       "type": "string",
       "defaultValue": "Standard_D3_v2",
       "metadata": {
@@ -301,7 +308,8 @@
               "protocol": "Tcp",
               "frontendPort": 443,
               "backendPort": 6443,
-              "idleTimeoutInMinutes": 15
+              "idleTimeoutInMinutes": 15,
+              "loadDistribution":"SourceIP"
             }
           }
         ],
@@ -397,7 +405,8 @@
           "adminPassword": { "value": "[parameters('adminPassword')]" },
           "authenticationType": { "value": "[parameters('authenticationType')]" },
           "sshPublicKey": { "value": "[parameters('sshPublicKey')]" },
-          "instanceType": { "value": "[parameters('instanceType')]" },
+          "instanceTypeByol": { "value": "[parameters('instanceTypeByol')]" },
+          "instanceTypePayg": { "value": "[parameters('instanceTypePayg')]" },
           "availabilitySetName": { "value": "[variables('availabilitySetName')]" },
           "asId": { "value": "[variables('asId')]" },
           "nicNamePrefix": { "value": "[variables('nicNamePrefix')]" },

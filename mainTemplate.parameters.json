@@ -11,6 +11,7 @@
     },
     "location": {
       "type": "string",
+      "defaultValue": "westus",
       "metadata": {
         "description": "The Azure location hosting the resource"
       }
@@ -30,13 +31,15 @@
       }
     },
     "adminPassword": {
-      "type": "string",
+      "type": "securestring",
+      "defaultValue": "",
       "metadata": {
         "description": "The BIG-IP administrator password."
       }
     },
     "sshPublicKey": {
       "type": "string",
+      "defaultValue": "",
       "metadata": {
         "description": "The BIG-IP ssh public key."
       }
@@ -47,7 +50,14 @@
         "description": "The type of auth utilized - password or ssh public key"
       }
     },
-    "instanceType": {
+    "instanceTypeByol": {
+      "type": "string",
+      "defaultValue": "Standard_D3_v2",
+      "metadata": {
+        "description": "The size of the Virtual Hardware Instance."
+      }
+    },
+    "instanceTypePayg": {
       "type": "string",
       "defaultValue": "Standard_D3_v2",
       "metadata": {
@@ -63,13 +73,13 @@
     "licenseToken1": {
       "type": "string",
       "metadata": {
-        "description": "The License Token for the first BYOL F5 Web Application Firewall."
+        "description": "The License Token for the first F5 BIG-IP."
       }
     },
     "licenseToken2": {
       "type": "string",
       "metadata": {
-        "description": "The License Token for the first BYOL F5 Web Application Firewall."
+        "description": "The License Token for the second BYOL F5 BIG-IP."
       }
     },
     "authFqdn": {
@@ -103,7 +113,7 @@
       }
     },
     "sslPswd": {
-      "type": "string",
+      "type": "securestring",
       "metadata": {
         "description": "The SSL certificate .pfx file corresponding to public facing VIP."
       }

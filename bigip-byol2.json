@@ -86,7 +86,13 @@
         "description": "The ssh public key"
       }
     },
-    "instanceType": {
+    "instanceTypeByol": {
+      "type": "string",
+      "metadata": {
+        "description": "The bigip instance size"
+      }
+    },
+    "instanceTypePayg": {
       "type": "string",
       "metadata": {
         "description": "The bigip instance size"
@@ -137,7 +143,7 @@
     "domainFqdn": {
       "type": "string",
       "metadata": {
-        "description": "Federation Domaain Name"
+        "description": "Federation Domain Name"
       }
     },
     "commandArgs": {
@@ -247,7 +253,7 @@
           "id": "[parameters('asId')]"
         },
         "hardwareProfile": {
-          "vmSize": "[parameters('instanceType')]"
+          "vmSize": "[parameters('instanceTypeByol')]"
         },
         "osProfile": "[variables(variables('osProfileChosen'))]",
         "storageProfile": {
@@ -292,7 +298,6 @@
       "properties": {
         "publisher": "Microsoft.Azure.Extensions",
         "type": "CustomScript",
-        "autoUpgradeMinorVersion": true,        
         "typeHandlerVersion": "2.0",
         "settings": {
           "fileUris": [
@@ -316,7 +321,6 @@
       "properties": {
         "publisher": "Microsoft.Azure.Extensions",
         "type": "CustomScript",
-        "autoUpgradeMinorVersion": true,
         "typeHandlerVersion": "2.0",
         "settings": {
           "fileUris": [

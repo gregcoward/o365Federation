@@ -22,19 +22,39 @@
             "toolTip": "Select the number of BIG-IPs to deploy, (1 or 2).",
             "constraints": {
               "allowedValues": [
+                {
+                  "label": "1",
+                  "value": "1"
+                },
+                {
+                  "label": "2",
+                  "value": "2"
+                }
+              ]
+            },
+            "visible": true
+          },      
+          {
+            "name": "licenseModel",
+            "type": "Microsoft.Common.DropDown",
+            "label": "BIG-ip Licensing Model",
+            "defaultValue": "hourly",
+            "toolTip": "Select either hourly or byol.",
+            "constraints": {
+              "allowedValues": [
               {
-                "label": "1",
-                "value": "1"
+                "label": "Hourly Billing",
+                "value": "hourly"
               },
               {
-                "label": "2",
-                "value": "2"
+                "label": "Bring Your Own License",
+                "value": "byol"
               }
             ],
               "visible": true,
-              "validationMessage": "Select the number of BIG-IPs to deploy, (1 or 2)."
+              "validationMessage": "Select either hourly billing or BYOL"
             }
-          },          
+          },              
           {
             "name": "adminUsername",
             "type": "Microsoft.Compute.UserNameTextBox",
@@ -66,7 +86,7 @@
             "osPlatform": "Linux"
           },
           {
-            "name": "instanceType",
+            "name": "instanceTypeByol",
             "type": "Microsoft.Compute.SizeSelector",
             "label": "Virtual machine size",
             "toolTip": "Select the desired instance size for virtual machine to provision.",
@@ -88,7 +108,44 @@
                 "Standard_D5"
               ]
             },
-            "osPlatform": "Linux"
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "f5-networks",
+              "offer": "f5-big-ip",
+              "sku": "f5-bigip-virtual-edition-best-byol"
+            },
+            "visible": "[equals(steps('bigipSettings').licenseModel, 'byol')]"
+          },
+          {
+            "name": "instanceTypePayg",
+            "type": "Microsoft.Compute.SizeSelector",
+            "label": "Virtual machine size",
+            "toolTip": "Select the desired instance size for virtual machine to provision.",
+            "recommendedSizes": [
+              "Standard_D3_v2",
+              "Standard_DS3_v2",
+              "Standard_A3",
+              "Standard_A4",
+              "Standard_F4"
+            ],
+            "constraints": {
+              "allowedSizes": [
+                "Standard_D3_v2",
+                "Standard_DS3_v2",
+                "Standard_A3",
+                "Standard_A4",
+                "Standard_F4",
+                "Standard_D2",
+                "Standard_D5"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "f5-networks",
+              "offer": "f5-big-ip-hourly",
+              "sku": "f5-bigip-virtual-edition-1g-best-hourly"
+             },
+            "visible": "[equals(steps('bigipSettings').licenseModel, 'hourly')]"
           },
           {
             "name": "virtualNetwork",
@@ -128,49 +185,28 @@
             "visible": true
           },
           {
-            "name": "licenseModel",
-            "type": "Microsoft.Common.DropDown",
-            "label": "BIG-ip Licensing Model",
-            "defaultValue": "hourly",
-            "toolTip": "Select either hourly or byol.",
-            "constraints": {
-              "allowedValues": [
-              {
-                "label": "Hourly Billing",
-                "value": "hourly"
-              },
-              {
-                "label": "Bring Your Own License",
-                "value": "byol"
-              }
-            ],
-              "visible": true,
-              "validationMessage": "Select either hourly billing or BYOL"
-            }
-          },
-          {
             "name": "licenseToken1",
             "type": "Microsoft.Common.TextBox",
-            "label": "BYOL License Key - (Leave default for hourly billing)",
+            "label": "BYOL License Key1",
             "defaultValue": "XXXXX-XXXXX-XXXXX-XXXXX-XXXXXXX",
-            "toolTip": "Enter the F5 BIG-IP License key if utilizing BYOL licensing model, (not required for hourly billing).",
+            "toolTip": "Enter the F5 BIG-IP License key.",
             "constraints": {
               "regex": "^[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{7}$",
               "validationMessage": "Provide the BIG-IP licence key in XXXXX-XXXXX-XXXXX-XXXXX-XXXXXXX format."
-
-            }
+            },
+            "visible": "[equals(steps('bigipSettings').licenseModel, 'byol')]"
           },
           {
             "name": "licenseToken2",
             "type": "Microsoft.Common.TextBox",
-            "label": "BYOL License Key - (Leave default for hourly billing/single BIG-IP)",
+            "label": "BYOL License Key2",
             "defaultValue": "XXXXX-XXXXX-XXXXX-XXXXX-XXXXXXX",
-            "toolTip": "Enter the F5 BIG-IP License key if utilizing BYOL licensing model, (not required for hourly billing).",
+            "toolTip": "Enter the F5 BIG-IP License key.",
             "constraints": {
               "regex": "^[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{5}-[A-Z]{7}$",
               "validationMessage": "Provide the BIG-IP licence key in XXXXX-XXXXX-XXXXX-XXXXX-XXXXXXX format."
-
-            }
+            },
+            "visible": "[and(equals(steps('bigipSettings').licenseModel, 'byol'), equals(int(steps('bigipSettings').numberOfInstances), 2)]"
           }
         ]
       },
@@ -236,7 +272,6 @@
             "name": "sslCert",
             "type": "Microsoft.Common.FileUpload",
             "label": "SSL Certificate Upload",
-            "defaultValue": "required",
             "toolTip": "Browse to and select the SSL certificate, (.pfx format) file corresponding to public facing VIP.",
             "constraints": {
               "required": true,
@@ -273,15 +308,16 @@
     ],
     "outputs": {
       "location": "[location()]",
-      "numberOfInstances": "[steps('bigipSettings').numberOfInstances]",
+      "numberOfInstances": "[int(steps('bigipSettings').numberOfInstances)]",
+      "licenseModel": "[steps('bigipSettings').licenseModel]",
       "adminUsername": "[steps('bigipSettings').adminUsername]",
       "adminPassword": "[steps('bigipSettings').SSHCredentials.password]",
       "sshPublicKey": "[steps('bigipSettings').SSHCredentials.sshPublicKey]",
       "authenticationType": "[steps('bigipSettings').SSHCredentials.authenticationType]",
-      "instanceType": "[steps('bigipSettings').instanceType]",
-      "licenseModel": "[steps('bigipSettings').licenseModel]",
+      "instanceTypeByol": "[steps('bigipSettings').instanceTypeByol]",
+      "instanceTypePayg": "[steps('bigipSettings').instanceTypePayg]",
       "licenseToken1": "[steps('bigipSettings').licenseToken1]",
-      "licenseToken2": "[steps('bigipSettings').licenseToken1]",
+      "licenseToken2": "[steps('bigipSettings').licenseToken2]",
       "authFqdn": "[steps('federationSettings').authFqdn]",
       "authIp": "[steps('federationSettings').authIp]",
       "domainFqdn": "[steps('federationSettings').domainFqdn]",
